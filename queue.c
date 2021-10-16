@@ -6,6 +6,7 @@
 // A linked list (LL) node to store a queue entry
 struct QNode {
 	int key;
+    void* value;
 	struct QNode* next;
 };
 
@@ -16,10 +17,10 @@ struct Queue {
 };
 
 // A utility function to create a new linked list node.
-struct QNode* newNode(int k)
+struct QNode* newNode(void* k)
 {
 	struct QNode* temp = (struct QNode*)malloc(sizeof(struct QNode));
-	temp->key = k;
+	temp->value = k;
 	temp->next = NULL;
 	return temp;
 }
@@ -33,7 +34,7 @@ struct Queue* createQueue()
 }
 
 // The function to add a key k to q
-void enQueue(struct Queue* q, int k)
+void enQueue(struct Queue* q, void* k)
 {
 	// Create a new LL node
 	struct QNode* temp = newNode(k);
@@ -80,7 +81,7 @@ void deQueue(struct Queue* q)
 // 	enQueue(q, 40);
 // 	enQueue(q, 50);
 // 	deQueue(q);
-// 	printf("Queue Front : %d \n", q->front->key);
-// 	printf("Queue Rear : %d", q->rear->key);
+// 	printf("Queue Front : %d \n", q->front->value);
+// 	printf("Queue Rear : %d", q->rear->value);
 // 	return 0;
 // }

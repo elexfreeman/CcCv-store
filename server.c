@@ -1,5 +1,5 @@
 /*
-	C socket server example, handles multiple clients using threads
+    C socket server example, handles multiple clients using threads
 */
 
 #include <stdio.h>
@@ -9,10 +9,13 @@
 #include <arpa/inet.h> //inet_addr
 #include <unistd.h>    //write
 #include <pthread.h>   //for threading , link with lpthread
-#include "list.h"
+#include "list.c"
+#include "queue.c"
 
 //the thread function
 void *connection_handler(void *);
+
+struct Queue* q = createQueue();
 
 int main(int argc, char *argv[])
 {

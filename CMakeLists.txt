@@ -3,7 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project ("Srv")
+project ("CcCvStore")
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -12,11 +12,24 @@ SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread")
 
 # Добавьте источник в исполняемый файл этого проекта.
 # add_executable (CMakeProject1 "CMakeProject1.cpp" "CMakeProject1.h")
-add_executable (Srv "server.c")
-# add_executable (Srv "server2.c")
+# add_executable (CcCvStore "server.c")
+# add_executable (CcCvStore "server2.c")
 
-target_link_libraries(Srv Threads::Threads)
+ADD_LIBRARY(LibsModule 
+  ht.c
+  list.c
+)
+
 find_package(Threads REQUIRED)
+
+#target_link_libraries(LibsModule -lpthread)
+#target_link_libraries(LibsModule Threads::Threads)
+
+add_executable (CcCvStore "test.c")
+
+target_link_libraries(LibsModule -lpthread)
+target_link_libraries(LibsModule Threads::Threads)
+target_link_libraries(CcCvStore PUBLIC LibsModule)
 
 
 
