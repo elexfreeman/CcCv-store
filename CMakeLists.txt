@@ -18,6 +18,7 @@ SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread")
 ADD_LIBRARY(LibsModule 
   ht.c
   list.c
+  queue.c
 )
 
 find_package(Threads REQUIRED)
@@ -26,6 +27,7 @@ find_package(Threads REQUIRED)
 #target_link_libraries(LibsModule Threads::Threads)
 
 add_executable (CcCvStore "test.c")
+# add_executable (CcCvStore "server.c")
 
 target_link_libraries(LibsModule -lpthread)
 target_link_libraries(LibsModule Threads::Threads)

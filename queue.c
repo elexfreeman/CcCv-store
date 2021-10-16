@@ -1,13 +1,22 @@
 
 // A C program to demonstrate linked list based implementation of queue
+//
+// mutex lock
+// https://docs.oracle.com/cd/E19455-01/806-5257/sync-12/index.html
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+
+pthread_mutex_t rear_mutex;
+pthread_mutex_t rear_front;
 
 // A linked list (LL) node to store a queue entry
 struct QNode {
 	int key;
     void* value;
-	struct QNode* next;
+    struct QNode* next;
+	pthread_mutex_t lock;
 };
 
 // The queue, front stores the front node of LL and rear stores the
@@ -40,6 +49,8 @@ void enQueue(struct Queue* q, void* k)
 	struct QNode* temp = newNode(k);
 
 	// If queue is empty, then new node is front and rear both
+    //
+    pthread_mutex_lock(&rear_mutex);
 	if (q->rear == NULL) {
 		q->front = q->rear = temp;
 		return;
@@ -48,11 +59,14 @@ void enQueue(struct Queue* q, void* k)
 	// Add the new node at the end of queue and change rear
 	q->rear->next = temp;
 	q->rear = temp;
+
+    pthread_mutex_lock(&rear_mutex);
 }
 
 // Function to remove a key from given queue q
-void deQueue(struct Queue* q)
+void* deQueue(struct Queue* q)
 {
+    void* resp;
 	// If queue is empty, return NULL.
 	if (q->front == NULL)
 		return;
@@ -65,8 +79,9 @@ void deQueue(struct Queue* q)
 	// If front becomes NULL, then change rear also as NULL
 	if (q->front == NULL)
 		q->rear = NULL;
-
+    resp = temp->value;
 	free(temp);
+    return resp;
 }
 
 // Driver Program to test anove functions

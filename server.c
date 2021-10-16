@@ -11,14 +11,70 @@
 #include <pthread.h>   //for threading , link with lpthread
 #include "list.c"
 #include "queue.c"
+#include "ht.c"
 
-//the thread function
-void *connection_handler(void *);
+void task_manager(void* task_queue)
+{
+}
 
-struct Queue* q = createQueue();
+/*
+ * This will handle connection for each client
+ * */
+void *connection_handler(void *socket_desc)
+{
+    int bCanFree = 0;
+    //Get the socket descriptor
+    int sock = *(int *)socket_desc;
+    int read_size;
+    char *message, client_message[2000];
+    char* q = "q";
+
+    //Send some messages to the client
+    message = "Greetings! I am your connection handler\n";
+    write(sock, message, strlen(message));
+
+    message = "Now type something and i shall repeat what you type \n";
+    write(sock, message, strlen(message));
+
+    //Receive a message from client
+    // while( (read_size = recv(client_sock , client_message , 2000 , 0)) > 0 )
+    while (bCanFree==0)
+    { 
+        read_size = recv(sock, client_message, 2000, 0);
+        if (strcmp(client_message, q) == 0)
+        {
+            bCanFree = 1;
+            puts("quit");
+        }
+        else 
+        {
+          puts(client_message);
+          //Send the message back to client
+          write(sock, client_message, strlen(client_message));
+        }
+    }
+
+    close(*((int *)socket_desc));
+    puts("Client disconnected");
+    fflush(stdout);
+
+
+//    if (read_size == 0)
+//    {
+//        puts("Client disconnected");
+//        fflush(stdout);
+//    }
+//    else if (read_size == -1)
+//    {
+//        perror("recv failed");
+//    }
+
+}
 
 int main(int argc, char *argv[])
 {
+    struct Queue* q = createQueue();
+    struct ht* a_map = ht_create();
 
     struct stru_list *head = NULL;
     struct stru_list *current = NULL;
@@ -84,56 +140,3 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-/*
- * This will handle connection for each client
- * */
-void *connection_handler(void *socket_desc)
-{
-    int bCanFree = 0;
-    //Get the socket descriptor
-    int sock = *(int *)socket_desc;
-    int read_size;
-    char *message, client_message[2000];
-    char* q = "q";
-
-    //Send some messages to the client
-    message = "Greetings! I am your connection handler\n";
-    write(sock, message, strlen(message));
-
-    message = "Now type something and i shall repeat what you type \n";
-    write(sock, message, strlen(message));
-
-    //Receive a message from client
-    // while( (read_size = recv(client_sock , client_message , 2000 , 0)) > 0 )
-    while (bCanFree==0)
-    { 
-        read_size = recv(sock, client_message, 2000, 0);
-        if (strcmp(client_message, q) == 0)
-        {
-            bCanFree = 1;
-            puts("quit");
-        }
-        else 
-        {
-          puts(client_message);
-          //Send the message back to client
-          write(sock, client_message, strlen(client_message));
-        }
-    }
-
-    close(*((int *)socket_desc));
-    puts("Client disconnected");
-    fflush(stdout);
-
-
-//    if (read_size == 0)
-//    {
-//        puts("Client disconnected");
-//        fflush(stdout);
-//    }
-//    else if (read_size == -1)
-//    {
-//        perror("recv failed");
-//    }
-
-}
