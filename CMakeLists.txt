@@ -19,6 +19,8 @@ ADD_LIBRARY(LibsModule
   ht.c
   list.c
   queue.c
+  sts_queue.c
+  add_lib.c
 )
 
 find_package(Threads REQUIRED)
@@ -26,8 +28,10 @@ find_package(Threads REQUIRED)
 #target_link_libraries(LibsModule -lpthread)
 #target_link_libraries(LibsModule Threads::Threads)
 
-add_executable (CcCvStore "test.c")
-# add_executable (CcCvStore "server.c")
+# add_executable (CcCvStore "test.c")
+#add_executable (CcCvStore "test_add_lib.c")
+# add_executable (CcCvStore "test_task.c")
+add_executable (CcCvStore "server.c")
 
 target_link_libraries(LibsModule -lpthread)
 target_link_libraries(LibsModule Threads::Threads)

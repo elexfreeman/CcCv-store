@@ -8,7 +8,7 @@ struct stru_list
 };
 
 
-void printList(struct stru_list * head)
+void list_print(struct stru_list * head)
 {
   struct stru_list *ptr = head;
   printf("n[head] =>");
@@ -20,7 +20,7 @@ void printList(struct stru_list * head)
   printf(" [null]n");
 }
 
-struct stru_list * insert(struct stru_list * head, int data)
+struct stru_list * list_insert(struct stru_list * head, int data)
 {
   struct stru_list *link = (struct stru_list*) malloc(sizeof(struct stru_list));
   link->data = data;
@@ -28,7 +28,7 @@ struct stru_list * insert(struct stru_list * head, int data)
   return link;
 }
 
-int get(struct stru_list * head, int key)
+int list_get(struct stru_list * head, int key)
 {
   int resp = 0;
   int n = 0;

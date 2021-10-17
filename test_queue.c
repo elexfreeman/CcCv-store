@@ -55,7 +55,6 @@ int main(int argc, char **argv)
   void *ptr_data;
   int *ptr_int = malloc(sizeof(int));
   pthread_t sniffer_thread;
-
   if (pthread_create(&sniffer_thread, NULL, task_manager, (void *)task_in_queue) < 0)
   {
     perror("could not create thread");

@@ -11,3 +11,6 @@ CTestTestfile.cmake
 _deps
 CcCvStore
 *.a
+.vscode
+.cmake
+build
