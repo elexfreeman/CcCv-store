@@ -2,48 +2,84 @@
 const net = require("net")
 const events = require("events");
 const readline = require("readline");
+const { resolve } = require("path/posix");
 
 // The port number and hostname of the server.
 const port = 8888;
 const host = '127.0.0.1';
 
 class MyEmitter extends events.EventEmitter { }
-const myEmitter = new MyEmitter();
-const client = new net.Socket();
+
+class CcCvStore {
+
+  constructor(_host, _port) {
+    this.host = _host;
+    this.port = _port;
+    this.myEmitter = new MyEmitter();
+    this.client = new net.Socket();
+  }
+
+  connect() {
+    return new Promise((resolve, reject) => {
+      this.client.connect(this.port, this.host, () => {
+        console.log(`CcCvStore connected to server ${this.host}:${this.port}`);
+        resolve(true);
+      });
+
+      this.client.on('data', (data) => {
+        this.myEmitter.emit('event', data);
+      });
+
+      this.client.on('close', () => {
+        console.log('CCcCvStore connection closed');
+      });
+
+    });
+  }
+
+  /**
+   * @param {string} key 
+   * @param {string} data 
+   * @returns {void}
+   */
+  setData(key, data) {
+    const d = `1|${key}|${data}`
+    console.log("Try write data",d);
+    this.client.write(d);
+  }
+
+  /**
+   * @param {string} key 
+   * @returns {Promise<string>}
+   */
+  getData(key) {
+    this.client.write(`2|${key}`);
+    return new Promise((resolve, reject) => {
+      this.myEmitter.on('event', (binData) => {
+        let data = binData.toString();
+        // example 2|mykey|mydata
+        let aData = data.split('|');
+        if ((aData[0] == '2') && (aData[1] == key)) {
+          resolve(aData[2]);
+        }
+      })
+    });
+  }
+
+}
+
+function main() {
+  const maxKeys = 1000000
+  const vCcCv = new CcCvStore(host, port);
+  vCcCv.connect().then(data => {
+    console.log('Connenced +++');
+    for (let k = 0; k < maxKeys; k++) {
+      vCcCv.setData(`KK_${k}`, `DATA_${k}`);
+    }
+
+  })
 
 
+}
 
-client.connect(port, host, function () {
-  console.log(`Connected to server ${host}:${port}`);
-  // start the typing event
-  myEmitter.emit('event');
-});
-
-client.on('data', data => {
-  console.log(data.toString());
-});
-
-client.on('close', function () {
-  console.log('Connection closed');
-});
-
-
-myEmitter.on('event', () => {
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-  rl.prompt();
-
-  // recerve text from keyboard
-  rl.on('line', line => {
-    const msg = line.trim();
-    // send msg
-    client.write(msg);
-    rl.prompt();
-  }).on('close', () => {
-    process.exit(0);
-  });
-});
+main();

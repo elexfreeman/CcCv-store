@@ -1,3 +1,6 @@
+#ifndef STS_QUEUE_C
+#define STS_QUEUE_C
+
 #include "sts_queue.h"
 #include <stdlib.h>
 #include <pthread.h>
@@ -89,3 +92,5 @@ _StsQueue const StsQueue = {
     destroy,
     push,
     pop};
+
+#endif

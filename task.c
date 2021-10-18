@@ -1,3 +1,8 @@
+#ifndef _TASK_C
+#define _TASK_C
+#include <stdio.h>
+#include <stdbool.h>
+
 #define CMD_SET 1
 #define CMD_GET 2
 #define CMD_DELETE 3
@@ -20,3 +25,18 @@ struct stru_task_get
   char *key;
   void *data;
 };
+
+bool check_task(struct stru_task *task)
+{
+    if (task == NULL)
+    {
+        return false;
+    }
+    if (task->data == NULL)
+    {
+        return false;
+    }
+    return true;
+}
+
+#endif

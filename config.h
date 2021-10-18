@@ -1,0 +1,8 @@
+#ifndef _CONFIG_H
+#define _CONFIG_H
+
+#define CLIENT_MSG_SIZE 2000
+#define SERVER_DEFAULT_PORT_NUM 8888
+#define MAX_KEY_SIZE 1000
+
+#endif
