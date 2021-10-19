@@ -9,7 +9,6 @@
 #include "config.h"
 #include "global.h"
 
-
 #include "task.c"
 
 int parse_client_msg_cmd(const char *msg)
@@ -18,6 +17,10 @@ int parse_client_msg_cmd(const char *msg)
     if (msg[0] == '1')
     {
         cmd = CMD_SET;
+    }
+    if (msg[0] == '2')
+    {
+        cmd = CMD_GET;
     }
 
     return cmd;
@@ -99,10 +102,54 @@ struct stru_task_set *parse_client_msg_set(const char *msg)
         }
     }
 
-//    printf(">> key: %s \r\n ", key);
-//    printf(">> data: %s \r\n ", data);
+    //    printf(">> key: %s \r\n ", key);
+    //    printf(">> data: %s \r\n ", data);
 
     resp->data = data;
+    resp->key = key;
+
+    return resp;
+}
+
+struct stru_task_get *parse_client_msg_get(int sock, const char *msg)
+{
+    const char *ptr = msg;
+    int cmd = 0;
+
+    cmd = parse_client_msg_cmd(msg);
+    if (cmd == 0)
+        return NULL;
+
+    if (cmd != CMD_GET)
+        return NULL;
+
+    struct stru_task_get *resp = malloc(sizeof(struct stru_task_get *));
+    char *key = malloc(MAX_KEY_SIZE);
+    resp->sock = sock;
+    int key_size = 0;
+
+    bool b_find_cmd = true;
+    bool b_find_key = false;
+    int iterator_key = 2;
+    int idx = 0;
+
+    for (char c = *ptr; c; c = *++ptr)
+    {
+        if (idx == iterator_key)
+        {
+            b_find_key = true;
+        }
+        if (b_find_key)
+        {
+            if (key_size < MAX_KEY_SIZE - 1)
+            {
+                key[key_size] = msg[idx];
+                key[key_size + 1] = '\0';
+                key_size++;
+            }
+        }
+        idx++;
+    }
     resp->key = key;
 
     return resp;

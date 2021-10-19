@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <string.h> //strlen
 #include <stdlib.h> //strlen
+#include <unistd.h> //write
 
 #include "config.h"
 #include "global.h"
 #include "task.c"
-
 
 void task_set(struct stru_task *task)
 {
@@ -29,10 +29,55 @@ void task_set(struct stru_task *task)
     ht_set(g_store, task_data->key, task_data->data);
 
     // Print out words and frequencies, freeing values as we go.
-    hti it = ht_iterator(g_store);
-//    while (ht_next(&it)) {
-//        printf("%s %s \r\n", it.key, (char*)it.value);
-//    }
+    //    hti it = ht_iterator(g_store);
+    //    while (ht_next(&it)) {
+    //        printf("%s %s \r\n", it.key, (char*)it.value);
+    //    }
+
+    free(task_data);
+}
+
+void task_get(struct stru_task *task)
+{
+    struct stru_task_get *task_data;
+    void *ptr_data;
+
+    if (!check_task(task))
+    {
+        return;
+    }
+
+    if (task->cmd != CMD_GET)
+        return;
+
+    if (task->data == NULL)
+        return;
+
+    task_data = (struct stru_task_get *)task->data;
+    puts(task_data->key);
+    ptr_data = ht_get(g_store, task_data->key);
+
+    // TODO: calc msg size
+    char *msg = malloc(CLIENT_MSG_SIZE);
+    if (ptr_data)
+    {
+        snprintf(msg, CLIENT_MSG_SIZE, "2|%s|%s", task_data->key, (char *)ptr_data);
+        puts(msg);
+        write(task_data->sock, msg, strlen(msg));
+    }
+    else
+    {
+        snprintf(msg, CLIENT_MSG_SIZE, "2|%s|", task_data->key);
+        puts(msg);
+        write(task_data->sock, msg, strlen(msg));
+    }
+
+    free(msg);
+    // Print out words and frequencies, freeing values as we go.
+    //    hti it = ht_iterator(g_store);
+    //    while (ht_next(&it)) {
+    //        printf("%s %s \r\n", it.key, (char*)it.value);
+    //    }
 
     free(task_data);
 }
@@ -45,11 +90,18 @@ void *thread_task_manager(void *data)
         ptr_data = (struct stru_task *)StsQueue.pop(g_queue_task_in);
         if (ptr_data != NULL)
         {
+            printf("cmd = %d", ptr_data->cmd);
             if (ptr_data->cmd == CMD_SET)
             {
+                puts("go to task set");
                 task_set(ptr_data);
-                free(ptr_data);
             }
+            else if (ptr_data->cmd == CMD_GET)
+            {
+                puts("go to task GET");
+                task_get(ptr_data);
+            }
+            free(ptr_data);
         }
     }
 }

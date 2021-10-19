@@ -44,7 +44,6 @@ class CcCvStore {
    */
   setData(key, data) {
     const d = `1|${key}|${data}`
-    console.log("Try write data",d);
     this.client.write(d);
   }
 
@@ -68,14 +67,39 @@ class CcCvStore {
 
 }
 
-function main() {
-  const maxKeys = 1000000
-  const vCcCv = new CcCvStore(host, port);
-  vCcCv.connect().then(data => {
-    console.log('Connenced +++');
+const testSetData = (vCcCv) => {
+
     for (let k = 0; k < maxKeys; k++) {
       vCcCv.setData(`KK_${k}`, `DATA_${k}`);
     }
+    console.log('send data done');
+    setTimeout(() => {
+    for (let k = 0; k < maxKeys; k++) {
+      vCcCv.setData(`KK_${k}`, `DATA_${k}`);
+    }
+    console.log('send data done');
+    }, 2000)
+
+}
+
+
+
+
+function main() {
+  const maxKeys = 100;
+  const vCcCv = new CcCvStore(host, port);
+  vCcCv.connect().then(data => {
+    console.log('Connenced +++');
+
+    const key = 'mykey';
+
+    vCcCv.setData(key, 'mydata');
+    setTimeout(()=> {
+      console.log('try get data');
+      vCcCv.getData("aaadadasd").then(data => {
+        console.log(data);
+      })
+    }, 1000);
 
   })
 

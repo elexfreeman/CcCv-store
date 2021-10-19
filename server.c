@@ -1,7 +1,6 @@
 
 /*
     C socket server example, handles multiple clients using threads
-
 */
 
 #include <stdio.h>
@@ -24,18 +23,12 @@
 #include "thread_task_manager.c"
 
 
-void *task_get(struct stru_task *task)
-{
-    return NULL;
-}
-
-
-
 int main(int argc, char *argv[])
 {
     pthread_t sniffer_thread_tasks;
     int socket_desc, client_sock, c, *new_sock;
     struct sockaddr_in server, client;
+    char *message = "Heleleoe client";
 
     g_queue_task_in = StsQueue.create();
     g_store = ht_create();
@@ -92,7 +85,7 @@ int main(int argc, char *argv[])
         }
 
         //Now join the thread , so that we dont terminate before the thread
-        //pthread_join(sniffer_thread, NULL);
+        pthread_join(sniffer_thread, NULL);
     }
 
     pthread_join(sniffer_thread_tasks, NULL);

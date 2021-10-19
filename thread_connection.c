@@ -21,55 +21,74 @@ void *thread_connection(void *socket_desc)
     //Get the socket descriptor
     int sock = *(int *)socket_desc;
     int read_size;
-    char *message, client_message[CLIENT_MSG_SIZE];
-    char *q = "q";
+    char *message;
     int cmd;
-    void* buf;
+
+    fd_set read_sd;
+    FD_ZERO(&read_sd);
+    FD_SET(sock, &read_sd);
 
     //Send some messages to the client
     message = "Greetings! I am your connection handler\n";
     write(sock, message, strlen(message));
 
-    message = "Now type something and i shall repeat what you type \n";
-    write(sock, message, strlen(message));
-
-    //Receive a message from client
-    while ((read_size = recv(sock, client_message, CLIENT_MSG_SIZE, 0)) > 0)
+    while (true)
     {
-        cmd = parse_client_msg_cmd(client_message);
-        if (cmd == CMD_SET)
+        fd_set rsd = read_sd;
+
+        int sel = select(sock + 1, &rsd, 0, 0, 0);
+
+        if (sel > 0)
         {
-            struct stru_task *task = malloc(sizeof(struct stru_task *));
-            task->cmd = CMD_SET;
-            task->data = parse_client_msg_set(client_message);
-            StsQueue.push(g_queue_task_in, task);
-        }
+            void* buff = malloc(CLIENT_MSG_SIZE);
+            // client has performed some activity (sent data or disconnected?)
+            read_size = recv(sock, buff, CLIENT_MSG_SIZE, 0);
 
-        int resp = send(sock, buf, sizeof(buf), MSG_NOSIGNAL);
-
-        if (resp == -1)
-        { /* other side gone away */
-        //Send the message back to client
-            puts("Client disconnected and error");
-            write(sock, client_message, strlen(client_message));
+            if (read_size > 0)
+            {
+                puts((char*)buff);
+                // got data from the client.
+                cmd = parse_client_msg_cmd(buff);
+                if (cmd == CMD_SET)
+                {
+                    struct stru_task *task = malloc(sizeof(struct stru_task *));
+                    task->cmd = CMD_SET;
+                    task->data = parse_client_msg_set(buff);
+                    StsQueue.push(g_queue_task_in, task);
+                }
+                else if(cmd == CMD_GET)
+                {
+                    puts("thr conn get branch");
+                    struct stru_task *task = malloc(sizeof(struct stru_task *));
+                    task->cmd = CMD_GET;
+                    task->data = parse_client_msg_get(sock, buff);
+                    puts("thr conn data push");
+                    StsQueue.push(g_queue_task_in, task);
+                }
+                free(buff);
+            }
+            else if (read_size == 0)
+            {
+                free(buff);
+                // client disconnected.
+                break;
+            }
+            else
+            {
+                // error receiving data from client. You may want to break from
+                // while-loop here as well.
+                free(buff);
+                break;
+            }
         }
-        //Send the message back to client
-        //write(sock, client_message, strlen(client_message));
+        else if (sel < 0)
+        {
+            // grave error occurred.
+            break;
+        }
     }
-
     close(*((int *)socket_desc));
     puts("Client disconnected");
-    //fflush(stdout);
-
-    if (read_size == 0)
-    {
-        puts("Client disconnected");
-        fflush(stdout);
-    }
-    else if (read_size == -1)
-    {
-        perror("recv failed");
-    }
 }
 
 #endif
