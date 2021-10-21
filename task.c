@@ -27,6 +27,12 @@ struct stru_task_get
   int sock;
 };
 
+struct stru_task_delete
+{
+  char *key;
+  int sock;
+};
+
 bool check_task(struct stru_task *task)
 {
     if (task == NULL)

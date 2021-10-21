@@ -1,7 +1,9 @@
-
-#include <string.h> //strlen
+#ifndef _ADD_LIB_C
+#define _ADD_LIB_C
+#include <string.h>
 #include <stdio.h>
-#include <stdlib.h> //strlen
+#include <stdlib.h>
+#include <malloc.h>
 
 char *lib_append(char *orig, char c)
 {
@@ -12,3 +14,23 @@ char *lib_append(char *orig, char c)
     str[sz + 1] = '\0';
     return str;
 }
+
+char *str_optimize(char *str)
+{
+    char *str_opt;
+    int idx = 0;
+
+    for (int i = 0; i < (int)malloc_usable_size(str); i++)
+    {
+        if (str[i] != '\0')
+        {
+            idx++;
+        }
+    }
+
+    str_opt = malloc(idx);
+    strcpy(str_opt, str);
+    
+    return str_opt;
+}
+#endif

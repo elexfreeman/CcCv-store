@@ -41,6 +41,7 @@ find_package(Threads REQUIRED)
 #add_executable (CcCvStore "test_add_lib.c")
 # add_executable (CcCvStore "test_task.c")
 add_executable (CcCvStore "server.c")
+#add_executable (CcCvStore "test_str.c")
 
 target_link_libraries(LibsModule -lpthread)
 target_link_libraries(LibsModule Threads::Threads)

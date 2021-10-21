@@ -46,7 +46,7 @@ void *thread_connection(void *socket_desc)
 
             if (read_size > 0)
             {
-                puts((char*)buff);
+                // puts((char*)buff);
                 // got data from the client.
                 cmd = parse_client_msg_cmd(buff);
                 if (cmd == CMD_SET)
@@ -58,11 +58,16 @@ void *thread_connection(void *socket_desc)
                 }
                 else if(cmd == CMD_GET)
                 {
-                    puts("thr conn get branch");
                     struct stru_task *task = malloc(sizeof(struct stru_task *));
                     task->cmd = CMD_GET;
                     task->data = parse_client_msg_get(sock, buff);
-                    puts("thr conn data push");
+                    StsQueue.push(g_queue_task_in, task);
+                }
+                else if(cmd == CMD_DELETE)
+                {
+                    struct stru_task *task = malloc(sizeof(struct stru_task *));
+                    task->cmd = CMD_DELETE;
+                    task->data = parse_client_msg_get(sock, buff);
                     StsQueue.push(g_queue_task_in, task);
                 }
                 free(buff);

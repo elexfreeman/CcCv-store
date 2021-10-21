@@ -69,6 +69,7 @@ class CcCvStore {
 
 const testSetData = (vCcCv) => {
 
+  const maxKeys = 10000;
     for (let k = 0; k < maxKeys; k++) {
       vCcCv.setData(`KK_${k}`, `DATA_${k}`);
     }
@@ -86,10 +87,10 @@ const testSetData = (vCcCv) => {
 
 
 function main() {
-  const maxKeys = 100;
   const vCcCv = new CcCvStore(host, port);
   vCcCv.connect().then(data => {
     console.log('Connenced +++');
+    testSetData(vCcCv);
 
     const key = 'mykey';
 
