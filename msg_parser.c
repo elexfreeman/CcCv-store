@@ -23,6 +23,10 @@ int parse_client_msg_cmd(const char *msg)
     {
         cmd = CMD_GET;
     }
+    if (msg[0] == '3')
+    {
+        cmd = CMD_DELETE;
+    }
 
     return cmd;
 }

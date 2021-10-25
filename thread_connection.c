@@ -46,7 +46,7 @@ void *thread_connection(void *socket_desc)
 
             if (read_size > 0)
             {
-                // puts((char*)buff);
+                 puts((char*)buff);
                 // got data from the client.
                 cmd = parse_client_msg_cmd(buff);
                 if (cmd == CMD_SET)
@@ -67,7 +67,7 @@ void *thread_connection(void *socket_desc)
                 {
                     struct stru_task *task = malloc(sizeof(struct stru_task *));
                     task->cmd = CMD_DELETE;
-                    task->data = parse_client_msg_get(sock, buff);
+                    task->data = parse_client_msg_delete(sock, buff);
                     StsQueue.push(g_queue_task_in, task);
                 }
                 free(buff);

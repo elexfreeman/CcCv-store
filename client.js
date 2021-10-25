@@ -47,6 +47,15 @@ class CcCvStore {
     this.client.write(d);
   }
 
+
+  /**
+   * @param {string} key 
+   * @returns {Promise<string>}
+   */
+  removeData(key) {
+    this.client.write(`3|${key}`);
+  }
+
   /**
    * @param {string} key 
    * @returns {Promise<string>}
@@ -70,17 +79,25 @@ class CcCvStore {
 const testSetData = (vCcCv) => {
 
   const maxKeys = 10000;
+  for (let k = 0; k < maxKeys; k++) {
+    vCcCv.setData(`KK_${k}`, `DATA_${k}`);
+  }
+  console.log('send data done');
+  setTimeout(() => {
     for (let k = 0; k < maxKeys; k++) {
       vCcCv.setData(`KK_${k}`, `DATA_${k}`);
     }
     console.log('send data done');
-    setTimeout(() => {
-    for (let k = 0; k < maxKeys; k++) {
-      vCcCv.setData(`KK_${k}`, `DATA_${k}`);
-    }
-    console.log('send data done');
-    }, 2000)
+  }, 2000)
 
+}
+
+const testRemoveDate = (vCcCv, key) => {
+  vCcCv.setData(key, 'mydata');
+  setTimeout(() => {
+    console.log('try remove data');
+    vCcCv.removeData(key);
+  }, 1000);
 }
 
 
@@ -90,17 +107,21 @@ function main() {
   const vCcCv = new CcCvStore(host, port);
   vCcCv.connect().then(data => {
     console.log('Connenced +++');
-    testSetData(vCcCv);
 
-    const key = 'mykey';
+    const key = 'mykey_to_remove';
+    testRemoveDate(vCcCv, key)
 
-    vCcCv.setData(key, 'mydata');
-    setTimeout(()=> {
-      console.log('try get data');
-      vCcCv.getData("aaadadasd").then(data => {
-        console.log(data);
-      })
-    }, 1000);
+    //    testSetData(vCcCv);
+    //
+    //    const key = 'mykey';
+    //
+    //    vCcCv.setData(key, 'mydata');
+    //    setTimeout(()=> {
+    //      console.log('try get data');
+    //      vCcCv.getData("aaadadasd").then(data => {
+    //        console.log(data);
+    //      })
+    //    }, 1000);
 
   })
 

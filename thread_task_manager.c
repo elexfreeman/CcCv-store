@@ -26,6 +26,7 @@ void task_delete(struct stru_task *task)
         return;
 
     task_data = (struct stru_task_delete *)task->data;
+
     ht_remove(g_store, task_data->key);
 
     free(task_data);
@@ -115,6 +116,11 @@ void *thread_task_manager(void *data)
             else if (ptr_data->cmd == CMD_GET)
             {
                 task_get(ptr_data);
+            }
+            else if (ptr_data->cmd == CMD_DELETE)
+            {
+                puts("go to deleet \r\n");
+                task_delete(ptr_data);
             }
             free(ptr_data);
         }
