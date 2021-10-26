@@ -1,6 +1,6 @@
 
 /*
-    C socket server example, handles multiple clients using threads
+    simple implementation of key-value store
 */
 
 #include <stdio.h>
