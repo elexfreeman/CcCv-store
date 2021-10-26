@@ -92,12 +92,6 @@ void task_get(struct stru_task *task)
     }
 
     free(msg);
-    // Print out words and frequencies, freeing values as we go.
-    //    hti it = ht_iterator(g_store);
-    //    while (ht_next(&it)) {
-    //        printf("%s %s \r\n", it.key, (char*)it.value);
-    //    }
-
     free(task_data);
 }
 
@@ -109,19 +103,9 @@ void *thread_task_manager(void *data)
         ptr_data = (struct stru_task *)StsQueue.pop(g_queue_task_in);
         if (ptr_data != NULL)
         {
-            if (ptr_data->cmd == CMD_SET)
-            {
-                task_set(ptr_data);
-            }
-            else if (ptr_data->cmd == CMD_GET)
-            {
-                task_get(ptr_data);
-            }
-            else if (ptr_data->cmd == CMD_DELETE)
-            {
-                puts("go to deleet \r\n");
-                task_delete(ptr_data);
-            }
+            task_set(ptr_data);
+            task_get(ptr_data);
+            task_delete(ptr_data);
             free(ptr_data);
         }
     }

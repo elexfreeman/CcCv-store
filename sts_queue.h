@@ -19,11 +19,12 @@ static void destroy(StsHeader *header);
 static void push(StsHeader *header, void *elem);
 static void *pop(StsHeader *header);
 
-typedef struct {
-  StsHeader* (* const create)();
-  void (* const destroy)(StsHeader *handle);
-  void (* const push)(StsHeader *handle, void *elem);
-  void* (* const pop)(StsHeader *handle);
+typedef struct
+{
+    StsHeader *(*const create)();
+    void (*const destroy)(StsHeader *handle);
+    void (*const push)(StsHeader *handle, void *elem);
+    void *(*const pop)(StsHeader *handle);
 } _StsQueue;
 
 extern _StsQueue const StsQueue;

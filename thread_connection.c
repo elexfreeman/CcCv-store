@@ -35,7 +35,6 @@ void *thread_connection(void *socket_desc)
     while (true)
     {
         fd_set rsd = read_sd;
-
         int sel = select(sock + 1, &rsd, 0, 0, 0);
 
         if (sel > 0)
@@ -46,7 +45,6 @@ void *thread_connection(void *socket_desc)
 
             if (read_size > 0)
             {
-                 puts((char*)buff);
                 // got data from the client.
                 cmd = parse_client_msg_cmd(buff);
                 if (cmd == CMD_SET)

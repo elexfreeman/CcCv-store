@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+// commands consts
 #define CMD_SET 1
 #define CMD_GET 2
 #define CMD_DELETE 3
