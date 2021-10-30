@@ -23,6 +23,7 @@ ADD_LIBRARY(LibsModule
 
   global.h
   config.h
+  disc_data/disc_data.c
 
   task.c
   msg_parser.c
@@ -36,11 +37,11 @@ find_package(Threads REQUIRED)
 #target_link_libraries(LibsModule -lpthread)
 #target_link_libraries(LibsModule Threads::Threads)
 
-#add_executable (CcCvStore "test_rw_file.c")
+add_executable (CcCvStore "test_rw_file.c")
 # add_executable (CcCvStore "test.c")
 #add_executable (CcCvStore "test_add_lib.c")
 # add_executable (CcCvStore "test_task.c")
-add_executable (CcCvStore "server.c")
+#add_executable (CcCvStore "server.c")
 #add_executable (CcCvStore "test_str.c")
 
 target_link_libraries(LibsModule -lpthread)

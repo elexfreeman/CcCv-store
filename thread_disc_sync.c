@@ -96,61 +96,7 @@
 //free(task_data);
 //}
 
-// struct for idx data file
-typedef struct
-{
-    int position;
-    char key[MAX_KEY_SIZE];
-} st_idx_data;
 
-// struct for data file
-typedef struct
-{
-    char key[MAX_KEY_SIZE];
-    char value[MAX_VALUE_SIZE];
-} st_data;
-
-// struct for args function
-typedef struct
-{
-    FILE *fp;
-    char key[MAX_KEY_SIZE];
-    struct ht *idx_map;
-} st_fnc_arg;
-
-// -----------------------------
-// INDEX FILE
-int idx_add_key(st_fnc_arg arg)
-{
-    return 0;
-}
-
-int idx_get_key_pos(st_fnc_arg arg)
-{
-    return 0;
-}
-
-void idx_remove_key(st_fnc_arg arg)
-{
-}
-
-void idx_init(FILE *fp_idx, struct ht *idx_map)
-{
-    int read_flag = 0;
-    int n = 0;
-    st_idx_data item;
-
-    for (n = 0; !feof(fp_idx); ++n)
-    {
-        read_flag = fread(&item, sizeof(st_idx_data), 1, fp_idx);
-        if (read_flag != 1)
-        {
-            break;
-        }
-        // ...
-        ht_set(idx_map, item.key, item.position);
-    }
-}
 
 void *thread_disc_sync(void *data)
 {
