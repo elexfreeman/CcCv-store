@@ -18,8 +18,6 @@ include_guard(GLOBAL)
 
 ADD_LIBRARY(LibsModule 
   ht.h
-  list.c
-  queue.c
   sts_queue.c
   add_lib.c
 
@@ -30,6 +28,7 @@ ADD_LIBRARY(LibsModule
   msg_parser.c
   thread_connection.c
   thread_task_manager.c
+  thread_disc_sync.c
 )
 
 find_package(Threads REQUIRED)
@@ -37,6 +36,7 @@ find_package(Threads REQUIRED)
 #target_link_libraries(LibsModule -lpthread)
 #target_link_libraries(LibsModule Threads::Threads)
 
+#add_executable (CcCvStore "test_rw_file.c")
 # add_executable (CcCvStore "test.c")
 #add_executable (CcCvStore "test_add_lib.c")
 # add_executable (CcCvStore "test_task.c")

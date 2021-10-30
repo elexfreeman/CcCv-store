@@ -21,10 +21,12 @@
 
 #include "thread_connection.c"
 #include "thread_task_manager.c"
+#include "thread_disc_sync.c"
 
 int main_server()
 {
     pthread_t sniffer_thread_tasks;
+    pthread_t sniffer_thread_disc_sync;
     int socket_desc, client_sock, c, *new_sock;
     struct sockaddr_in server, client;
     char *message = "Heleleoe client";
@@ -33,6 +35,13 @@ int main_server()
     g_store = ht_create();
 
     // thread for process tasks
+    if (pthread_create(&sniffer_thread_disc_sync, NULL, thread_disc_sync, NULL) < 0)
+    {
+        perror("could not create thread disc sync");
+        return 1;
+    }
+
+    // thread for disc sync
     if (pthread_create(&sniffer_thread_tasks, NULL, thread_task_manager, NULL) < 0)
     {
         perror("could not create thread");
