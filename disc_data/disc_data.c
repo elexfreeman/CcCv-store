@@ -38,7 +38,7 @@ typedef struct
  * get index seek of key in idx file 
  * need for add index to index file
  * */
-int idx_get_index_key(st_fnc_arg arg)
+static long idx_get_index_key(st_fnc_arg arg)
 {
     int resp = -1;
     st_idx_data idx_data;
@@ -53,7 +53,7 @@ int idx_get_index_key(st_fnc_arg arg)
         if (read_flag != 1)
             break;
 
-        if (idx_data.key == arg.key)
+        if (strcmp(idx_data.key, arg.key) == 0)
         {
             resp = n;
             break;
@@ -64,7 +64,7 @@ int idx_get_index_key(st_fnc_arg arg)
 }
 
 /**
- * Добавить позицию ключа дата файла в индекс
+ * add position to mem and file
  * */
 int idx_add_key_position(st_fnc_arg arg, int position)
 {
@@ -74,22 +74,33 @@ int idx_add_key_position(st_fnc_arg arg, int position)
     strcpy(add_data.key, arg.key);
     add_data.position = position;
 
-    // проверяем ключ в таблице ключей
+    // find key in memory
     st_idx_data *idx_data = (st_idx_data *)ht_get(arg.idx_map, arg.key);
 
     if (idx_data == NULL)
     {
-        // переходим в конец файла
+        printf("add NEW key %s \r\n", arg.key);
+        // go to end of file
         fseek(arg.fp, 0, SEEK_END);
         idx_file_add_position = ftell(arg.fp) / sizeof(st_idx_data);
+
+        // add to memory
+        char *key = malloc(MAX_KEY_SIZE);
+        int *val = malloc(sizeof(int *));
+
+        strcpy(key, arg.key);
+        *val = position;
+
+        ht_set(arg.idx_map, key, val);
     }
     else
     {
+        printf("rewrite key %s \r\n", arg.key);
         // переходим на позицию записи
         idx_file_add_position = idx_get_index_key(arg);
-        fseek(arg.fp, sizeof(st_idx_data), idx_get_index_key(arg));
+//        rewind(arg.fp);
+        fseek(arg.fp, (long)sizeof(st_idx_data) * idx_get_index_key(arg), SEEK_SET);
     }
-
     fwrite(&add_data, sizeof(st_idx_data), 1, arg.fp);
     // write to disk
     fflush(arg.fp);
@@ -101,11 +112,13 @@ int idx_get_key_pos(st_fnc_arg arg)
 {
     void *ptr;
     st_idx_data *data;
-    int resp = 0;
+    int resp = -1;
 
+    printf("get key = %s \r\n", arg.key);
     ptr = ht_get(arg.idx_map, arg.key);
     if (ptr != NULL)
     {
+        printf("ptr data = %s \r\n", (char *)ptr);
         data = (st_idx_data *)ptr;
         resp = data->position;
     }
@@ -117,21 +130,27 @@ void idx_remove_key(st_fnc_arg arg)
 {
 }
 
+/**
+ * Load data from file to memory 
+ * */
 void idx_init(FILE *fp_idx, struct ht *idx_map)
 {
     st_idx_data item;
     int read_flag = 0;
     int n = 0;
 
-    for (n = 0; !feof(fp_idx); ++n)
+    while (feof(fp_idx) || fread(&item, sizeof(st_idx_data), 1, fp_idx) == 1)
     {
-        read_flag = fread(&item, sizeof(st_idx_data), 1, fp_idx);
-        if (read_flag != 1)
-        {
-            break;
-        }
-        // ...
-        ht_set(idx_map, item.key, &item.position);
+        char *key = malloc(MAX_KEY_SIZE);
+        int *val = malloc(sizeof(int *));
+
+        strcpy(key, item.key);
+        *val = item.position;
+
+        printf("key = %s | val = %d \r\n", key, *val);
+
+        ht_set(idx_map, key, val);
     }
+    puts(" ");
 }
 #endif
