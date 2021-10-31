@@ -23,6 +23,7 @@ ADD_LIBRARY(LibsModule
 
   global.h
   config.h
+  disc_data/disc_types.h
   disc_data/disc_data.c
 
   task.c
