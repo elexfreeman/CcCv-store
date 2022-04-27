@@ -9,4 +9,12 @@
 #define DATA_FILE_NAME "db.dat"
 #define INDEX_FILE_NAME "idx.dat"
 
+struct stru_config
+{
+  int port;
+  char *address;
+  char* data_file_name;
+  char *store_file;   /* Database filename (UTF-8) */ 
+};
+
 #endif
