@@ -1,2 +1,3 @@
-cmake build .
-./CcCvStore
+#!/bin/bash
+
+cmake --build . && ./CcCvStore
