@@ -124,14 +124,13 @@ struct stru_task_get *parse_client_msg_get(int sock, const char *msg) {
 
   bool b_find_cmd = true;
   bool b_find_key = false;
-  int iterator_key = 2;
-  int idx = 0;
+  int idx = 2;
 
   for (char c = *ptr; c; c = *++ptr) {
-    if (idx == iterator_key) {
-      b_find_key = true;
-    }
-    if (b_find_key) {
+
+    if (msg[idx] == '|') {
+      break;
+    } else {
       if (key_size < MAX_KEY_SIZE - 1) {
         key[key_size] = msg[idx];
         key[key_size + 1] = '\0';
@@ -140,7 +139,9 @@ struct stru_task_get *parse_client_msg_get(int sock, const char *msg) {
     }
     idx++;
   }
+  printf("key raw = %s \r\n", key);
   resp->key = str_optimize(key);
+  printf("key  = %s \r\n", resp->key);
   free(key);
 
   return resp;

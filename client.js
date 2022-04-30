@@ -43,7 +43,7 @@ class CcCvStore {
    * @returns {void}
    */
   setData(key, data) {
-    const d = `1|${key}|${data}`
+    const d = `1|${key}|${data}|`
     this.client.write(d);
     return new Promise((resolve) => {
       this.myEmitter.on('event', (binData) => {
@@ -71,12 +71,16 @@ class CcCvStore {
    * @returns {Promise<string>}
    */
   getData(key) {
-    this.client.write(`2|${key}`);
+    const msg = `2|${key}|`;
+    console.log(msg);
+    this.client.write(msg);
     return new Promise((resolve) => {
       this.myEmitter.on('event', (binData) => {
         let data = binData.toString();
         // example 2|mykey|mydata
+        console.log(data);
         let aData = data.split('|');
+        console.log(aData);
         if ((aData[0] == '2') && (aData[1] == key)) {
           resolve(aData[2]);
         }
@@ -122,16 +126,16 @@ async function main() {
   //    const key = 'mykey_to_remove';
   //   testRemoveDate(vCcCv, key)
 
-  const count = 10;
+  const count = 1000;
   for (let k = 0; k < count; k++) {
-    await vCcCv.setData(`kkhhhhh_${k}`, `mydata ${k}`);
+      let key = `kkhhhhh_${k}`;
+    await vCcCv.setData(key, `mydata ${k}`);
   }
 
-  setTimeout(async () => {
     for (let k = 0; k < count; k++) {
-      console.log('>> ', k, await vCcCv.getData(`kkhhhhh_${k}`));
+      let key = `kkhhhhh_${k}`;
+      console.log('>> ', key, await vCcCv.getData(key));
     }
-  }, 1000);
 
 
 
