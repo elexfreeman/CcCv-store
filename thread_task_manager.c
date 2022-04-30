@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <semaphore.h>
 
 #include "config.h"
 #include "global.h"
@@ -98,6 +99,8 @@ void *thread_task_manager(void *data) {
       task_get(ptr_data);
       task_delete(ptr_data);
       free(ptr_data);
+    } else {
+      sem_wait(&sem_task);
     }
   }
 }

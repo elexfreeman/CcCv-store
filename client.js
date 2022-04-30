@@ -42,7 +42,7 @@ class CcCvStore {
    * @param {string} data 
    * @returns {void}
    */
-  async setData(key, data) {
+  setData(key, data) {
     const d = `1|${key}|${data}`
     this.client.write(d);
     return new Promise((resolve) => {
@@ -122,14 +122,14 @@ async function main() {
   //    const key = 'mykey_to_remove';
   //   testRemoveDate(vCcCv, key)
 
-  const count = 1000;
+  const count = 10;
   for (let k = 0; k < count; k++) {
-    await vCcCv.setData(`kk_${k}`, `mydata ${k}`);
+    await vCcCv.setData(`kkhhhhh_${k}`, `mydata ${k}`);
   }
 
   setTimeout(async () => {
     for (let k = 0; k < count; k++) {
-      console.log('>> ', k, await vCcCv.getData(`kk_${k}`));
+      console.log('>> ', k, await vCcCv.getData(`kkhhhhh_${k}`));
     }
   }, 1000);
 

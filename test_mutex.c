@@ -4,24 +4,30 @@
 #include <string.h>
 #include <unistd.h>
 
-pthread_t tid[2];
-int counter;
+pthread_t id_do;
+pthread_t id_locker;
+
 pthread_mutex_t lock;
+pthread_cond_t c = PTHREAD_COND_INITIALIZER;
 
 void *doSomeThing(void *arg) {
-  pthread_mutex_lock(&lock);
+  while (1) { 
+    printf("do start \n");
+    pthread_cond_wait(&c, &lock);
+    printf("do finish go sleep 7 \n");
+    sleep(7);
+  }
+  return NULL;
+}
 
-  unsigned long i = 0;
-  counter += 1;
-  printf("\n Job %d started\n", counter);
-
-  for (i = 0; i < (0xFFFFFFFF); i++)
-    ;
-
-  printf("\n Job %d finished\n", counter);
-
-  pthread_mutex_unlock(&lock);
-
+void *locker(void *arg) {
+  printf("locker start \n");
+  sleep(4);
+  pthread_cond_signal(&c);
+  printf("locker signal 5 \n");
+  sleep(5);
+  pthread_cond_signal(&c);
+  printf("locker signal 5 \n");
   return NULL;
 }
 
@@ -34,15 +40,17 @@ int main(void) {
     return 1;
   }
 
-  while (i < 2) {
-    err = pthread_create(&(tid[i]), NULL, &doSomeThing, NULL);
-    if (err != 0)
-      printf("\ncan't create thread :[%s]", strerror(err));
-    i++;
-  }
+  err = pthread_create(&id_do, NULL, &doSomeThing, NULL);
+  if (err != 0)
+    printf("\ncan't create thread :[%s]", strerror(err));
 
-  pthread_join(tid[0], NULL);
-  pthread_join(tid[1], NULL);
+  err = pthread_create(&id_locker, NULL, &locker, NULL);
+  if (err != 0)
+    printf("\ncan't create thread :[%s]", strerror(err));
+
+  pthread_join(id_do, NULL);
+  pthread_join(id_locker, NULL);
+
   pthread_mutex_destroy(&lock);
 
   return 0;

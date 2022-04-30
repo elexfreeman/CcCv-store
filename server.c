@@ -11,6 +11,7 @@
 #include <string.h> //strlen
 #include <sys/socket.h>
 #include <unistd.h> //write
+#include <semaphore.h>
 
 #include "ht.c"
 #include "sts_queue.c"
@@ -40,6 +41,7 @@ int main_server() {
   pthread_t sniffer_thread_tasks_01;
 //  pthread_t sniffer_thread_tasks_02;
 
+  sem_init(&sem_task, 0, 1);
 
   pthread_t sniffer_thread_disc_sync;
 
@@ -69,13 +71,6 @@ int main_server() {
     perror("could not create thread");
     return 1;
   }
-  //
-  // thread for process tasks
-//  if (pthread_create(&sniffer_thread_tasks_02, NULL, thread_task_manager, NULL) <
-//      0) {
-//    perror("could not create thread");
-//    return 1;
-//  }
 
   // Create socket
   socket_desc = socket(AF_INET, SOCK_STREAM, 0);
@@ -127,6 +122,8 @@ int main_server() {
   pthread_join(sniffer_thread_tasks_01, NULL);
 //  pthread_join(sniffer_thread_tasks_02, NULL);
   puts("EXIT");
+
+  sem_destroy(&sem_task);
 }
 
 void main_client() {
