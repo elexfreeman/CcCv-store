@@ -13,12 +13,14 @@ struct stru_task
 {
   int cmd;
   void *data;
+  int sock;
 };
 
 struct stru_task_set
 {
   char *key;
   void *data;
+  int sock;
 };
 
 struct stru_task_get

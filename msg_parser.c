@@ -29,7 +29,7 @@ int parse_client_msg_cmd(const char *msg) {
 
 // cmd|key|data
 // 1|key|data
-struct stru_task_set *parse_client_msg_set(const char *msg) {
+struct stru_task_set *parse_client_msg_set(int sock, const char *msg) {
   const char *ptr = msg;
   int cmd = 0;
 
@@ -40,6 +40,8 @@ struct stru_task_set *parse_client_msg_set(const char *msg) {
   struct stru_task_set *resp = malloc(sizeof(struct stru_task_set *));
   char *key = malloc(MAX_KEY_SIZE);
   char *data = malloc(CLIENT_MSG_SIZE);
+
+  resp->sock = sock;
 
   int key_size = 0;
   int data_size = 0;

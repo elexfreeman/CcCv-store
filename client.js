@@ -2,13 +2,13 @@
 const net = require("net")
 const events = require("events");
 const readline = require("readline");
-const { resolve } = require("path/posix");
+const {resolve} = require("path/posix");
 
 // The port number and hostname of the server.
 const port = 8888;
 const host = '127.0.0.1';
 
-class MyEmitter extends events.EventEmitter { }
+class MyEmitter extends events.EventEmitter {}
 
 class CcCvStore {
 
@@ -42,9 +42,19 @@ class CcCvStore {
    * @param {string} data 
    * @returns {void}
    */
-  setData(key, data) {
+  async setData(key, data) {
     const d = `1|${key}|${data}`
     this.client.write(d);
+    return new Promise((resolve) => {
+      this.myEmitter.on('event', (binData) => {
+        let data = binData.toString();
+        // example 2|mykey|mydata
+        let aData = data.split('|');
+        if ((aData[0] == '1') && (aData[1] == key)) {
+          resolve(true);
+        }
+      })
+    });
   }
 
 
@@ -62,7 +72,7 @@ class CcCvStore {
    */
   getData(key) {
     this.client.write(`2|${key}`);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.myEmitter.on('event', (binData) => {
         let data = binData.toString();
         // example 2|mykey|mydata
@@ -103,27 +113,26 @@ const testRemoveDate = (vCcCv, key) => {
 
 
 
-function main() {
+async function main() {
   const vCcCv = new CcCvStore(host, port);
-  vCcCv.connect().then(data => {
-    console.log('Connenced +++');
+  await vCcCv.connect();
 
-    const key = 'mykey_to_remove';
-    testRemoveDate(vCcCv, key)
+  console.log('Connenced +++');
 
-    //    testSetData(vCcCv);
-    //
-    //    const key = 'mykey';
-    //
-    //    vCcCv.setData(key, 'mydata');
-    //    setTimeout(()=> {
-    //      console.log('try get data');
-    //      vCcCv.getData("aaadadasd").then(data => {
-    //        console.log(data);
-    //      })
-    //    }, 1000);
+  //    const key = 'mykey_to_remove';
+  //   testRemoveDate(vCcCv, key)
 
-  })
+  const count = 1000;
+  for (let k = 0; k < count; k++) {
+    await vCcCv.setData(`kk_${k}`, `mydata ${k}`);
+  }
+
+  setTimeout(async () => {
+    for (let k = 0; k < count; k++) {
+      console.log('>> ', k, await vCcCv.getData(`kk_${k}`));
+    }
+  }, 1000);
+
 
 
 }
