@@ -64,8 +64,6 @@ void *thread_connection(void *socket_desc) {
       if (read_size > 0) {
         tasks_branch(sock, buff);
 
-        printf("> buff= %s \r\n" , (char*)buff);
-
         int *sem_val = malloc(sizeof(int));
         sem_getvalue(&sem_task, sem_val);
         if(*sem_val <1) { 

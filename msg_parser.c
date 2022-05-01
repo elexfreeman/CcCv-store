@@ -90,18 +90,9 @@ struct stru_task_set *parse_client_msg_set(int sock, const char *msg) {
       idx++;
     }
   }
-
-  //    printf(">> key: %s \r\n ", key);
-  //    printf(">> data: %s \r\n ", data);
-
   resp->data = data;
   resp->key = key;
 
-  //    resp->data = str_optimize(data);
-  //    resp->key = str_optimize(key);
-  //
-  //    free(key);
-  //    free(data);
 
   return resp;
 }
@@ -139,9 +130,7 @@ struct stru_task_get *parse_client_msg_get(int sock, const char *msg) {
     }
     idx++;
   }
-  printf("key raw = %s \r\n", key);
   resp->key = str_optimize(key);
-  printf("key  = %s \r\n", resp->key);
   free(key);
 
   return resp;
@@ -155,7 +144,7 @@ struct stru_task_delete *parse_client_msg_delete(int sock, const char *msg) {
   if (cmd == 0)
     return NULL;
 
-  if (cmd != CMD_DELETE)
+  if (cmd != CMD_GET)
     return NULL;
 
   struct stru_task_delete *resp = malloc(sizeof(struct stru_task_delete *));
@@ -165,14 +154,13 @@ struct stru_task_delete *parse_client_msg_delete(int sock, const char *msg) {
 
   bool b_find_cmd = true;
   bool b_find_key = false;
-  int iterator_key = 2;
-  int idx = 0;
+  int idx = 2;
 
   for (char c = *ptr; c; c = *++ptr) {
-    if (idx == iterator_key) {
-      b_find_key = true;
-    }
-    if (b_find_key) {
+
+    if (msg[idx] == '|') {
+      break;
+    } else {
       if (key_size < MAX_KEY_SIZE - 1) {
         key[key_size] = msg[idx];
         key[key_size + 1] = '\0';
@@ -181,6 +169,7 @@ struct stru_task_delete *parse_client_msg_delete(int sock, const char *msg) {
     }
     idx++;
   }
+
   resp->key = str_optimize(key);
   free(key);
 

@@ -57,7 +57,6 @@ void task_set(struct stru_task *task) {
 
   free(task_data);
 }
-
 void task_get(struct stru_task *task) {
   struct stru_task_get *task_data;
   void *ptr_data;
