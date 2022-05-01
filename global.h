@@ -3,6 +3,9 @@
 
 #include "ht.c"
 #include "sts_queue.c"
+#include <semaphore.h>
+
+sem_t sem_task;
 
 // queue for request
 StsHeader *g_queue_task_in;
