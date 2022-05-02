@@ -5,13 +5,13 @@
 
 #include <arpa/inet.h> //inet_addr
 #include <pthread.h>   //for threading , link with lpthread
+#include <semaphore.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h> //strlen
 #include <string.h> //strlen
 #include <sys/socket.h>
 #include <unistd.h> //write
-#include <semaphore.h>
 
 #include "ht.c"
 #include "sts_queue.c"
@@ -25,26 +25,33 @@
 #include "thread_disc_sync.c"
 #include "thread_task_manager.c"
 
+void set_termitate() {
+  fprintf(stderr, "\n Start exit...\n");
+  is_app_terminate = 1;
+  sleep(2);
+  abort();
+}
 
 void sig_handler(int sig) {
+  printf("signal: %d \n", sig);
   switch (sig) {
   case SIGSEGV:
-    fprintf(stderr, "give out a backtrace or something...\n");
-    abort();
+    set_termitate();
+  case SIGTERM:
+    set_termitate();
   default:
-    fprintf(stderr, "wasn't expecting that!\n");
-    abort();
+    set_termitate();
   }
 }
 
 int main_server() {
+
   pthread_t sniffer_thread_tasks_01;
-//  pthread_t sniffer_thread_tasks_02;
+  //  pthread_t sniffer_thread_tasks_02;
 
   sem_init(&sem_task, 0, 1);
 
   pthread_t sniffer_thread_disc_sync;
-
 
   int socket_desc, client_sock, c, *new_sock;
   struct sockaddr_in server, client;
@@ -53,7 +60,7 @@ int main_server() {
   g_queue_task_in = StsQueue.create();
   g_store = ht_create();
 
-  struct stru_config *conf = malloc(sizeof(struct stru_config)); 
+  struct stru_config *conf = malloc(sizeof(struct stru_config));
   store_init(conf);
 
   if (pthread_create(&sniffer_thread_disc_sync, NULL, thread_disc_sync, NULL) <
@@ -63,8 +70,8 @@ int main_server() {
   }
 
   // thread for process tasks
-  if (pthread_create(&sniffer_thread_tasks_01, NULL, thread_task_manager, NULL) <
-      0) {
+  if (pthread_create(&sniffer_thread_tasks_01, NULL, thread_task_manager,
+                     NULL) < 0) {
     perror("could not create thread");
     return 1;
   }
@@ -93,84 +100,48 @@ int main_server() {
   listen(socket_desc, 3);
 
   // Accept and incoming connection
-  puts("Waiting for incoming connections...");
   c = sizeof(struct sockaddr_in);
+  fd_set read_fd_set;
 
-  while (1) {
+  puts("Waiting for incoming connections...");
+  while (IS_APP_TRM) {
+
     client_sock =
         accept(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c);
 
-    puts("Connection accepted");
+    if (client_sock >= 0) {
+      puts("Connection accepted");
 
-    pthread_t sniffer_thread;
-    new_sock = malloc(1);
-    *new_sock = client_sock;
+      pthread_t sniffer_thread;
+      new_sock = malloc(1);
+      *new_sock = client_sock;
 
-    if (pthread_create(&sniffer_thread, NULL, thread_connection,
-                       (void *)new_sock) < 0) {
-      perror("could not create thread");
-      return 1;
+      if (pthread_create(&sniffer_thread, NULL, thread_connection,
+                         (void *)new_sock) < 0) {
+        perror("could not create thread");
+        return 1;
+      }
+
+      // Now join the thread , so that we dont terminate before the thread
+      pthread_join(sniffer_thread, NULL);
     }
-
-    // Now join the thread , so that we dont terminate before the thread
-    pthread_join(sniffer_thread, NULL);
   }
 
   pthread_join(sniffer_thread_tasks_01, NULL);
-//  pthread_join(sniffer_thread_tasks_02, NULL);
+  //  pthread_join(sniffer_thread_tasks_02, NULL);
   puts("EXIT");
 
   sem_destroy(&sem_task);
 
   free(conf);
-}
 
-void main_client() {
-  int sockfd, numbytes;
-  char buf[CLIENT_MSG_SIZE];
-  struct hostent *he;
-  struct sockaddr_in their_addr; /* connector's address information */
-
-  if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-    perror("socket");
-    exit(1);
-  }
-
-  their_addr.sin_family = AF_INET; /* host byte order */
-  their_addr.sin_port =
-      htons(SERVER_DEFAULT_PORT_NUM); /* short, network byte order */
-  their_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-  bzero(&(their_addr.sin_zero), 8); /* zero the rest of the struct */
-
-  if (connect(sockfd, (struct sockaddr *)&their_addr,
-              sizeof(struct sockaddr)) == -1) {
-    perror("connect");
-    exit(1);
-  }
-  while (1) {
-    if (send(sockfd, "Hello, world!\n", 14, 0) == -1) {
-      perror("send");
-      exit(1);
-    }
-    printf("After the send function \n");
-
-    if ((numbytes = recv(sockfd, buf, CLIENT_MSG_SIZE, 0)) == -1) {
-      perror("recv");
-      exit(1);
-    }
-
-    buf[numbytes] = '\0';
-
-    printf("Received in pid=%d, text=: %s \n", getpid(), buf);
-    sleep(1);
-  }
-
-  close(sockfd);
+  return 0;
 }
 
 int main(int argc, char *argv[]) {
-  signal(SIGSEGV, sig_handler);
+  if (signal(SIGINT, sig_handler) == SIG_ERR)
+    printf("\ncan't catch SIGINT\n");
+
   int i;
   bool is_server = true;
   printf("The following arguments were passed to main(): ");
@@ -179,7 +150,6 @@ int main(int argc, char *argv[]) {
     if (i == 1) {
       if (strcmp(argv[i], "client")) {
         is_server = false;
-        main_client();
       }
     }
   }

@@ -17,3 +17,4 @@ build
 test.txt
 *.db
 *.ini
+*.dat

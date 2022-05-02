@@ -91,7 +91,7 @@ void task_get(struct stru_task *task) {
 
 void *thread_task_manager(void *data) {
   struct stru_task *ptr_data;
-  while (true) {
+  while (IS_APP_TRM) {
     ptr_data = (struct stru_task *)StsQueue.pop(g_queue_task_in);
     if (ptr_data != NULL) {
       task_set(ptr_data);

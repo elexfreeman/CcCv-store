@@ -126,7 +126,7 @@ async function main() {
   //    const key = 'mykey_to_remove';
   //   testRemoveDate(vCcCv, key)
 
-  const count = 1000;
+  const count = 10;
   for (let k = 0; k < count; k++) {
       let key = `kkhhhhh_${k}`;
     await vCcCv.setData(key, `mydata ${k}`);

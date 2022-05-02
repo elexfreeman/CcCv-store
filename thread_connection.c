@@ -46,15 +46,21 @@ void *thread_connection(void *socket_desc) {
   int read_size;
   char *message;
   int cmd;
+  int sel;
 
   fd_set read_sd;
-  FD_ZERO(&read_sd);
-  FD_SET(sock, &read_sd);
 
-  while (true) {
-    fd_set rsd = read_sd;
-    int sel = select(sock + 1, &rsd, 0, 0, 0);
+  struct timeval timeout;
 
+  while (IS_APP_TRM) {
+
+  timeout.tv_sec = 1;
+  timeout.tv_usec = 0;
+
+    FD_ZERO(&read_sd);
+    FD_SET(sock, &read_sd);
+    sel = select(sock+1, &read_sd, 0, 0, &timeout);
+    // sel = select(sock, &read_sd, 0, 0, NULL);
     if (sel > 0) {
 
       void *buff = malloc(CLIENT_MSG_SIZE);
@@ -66,8 +72,8 @@ void *thread_connection(void *socket_desc) {
 
         int *sem_val = malloc(sizeof(int));
         sem_getvalue(&sem_task, sem_val);
-        if(*sem_val <1) { 
-        sem_post(&sem_task);
+        if (*sem_val < 1) {
+          sem_post(&sem_task);
         }
 
         free(sem_val);
