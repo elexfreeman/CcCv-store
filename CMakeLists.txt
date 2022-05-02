@@ -21,12 +21,10 @@ add_definitions(-DSQLITE_ENABLE_STAT4)
 
 
 # Добавьте источник в исполняемый файл этого проекта.
-# add_executable (CMakeProject1 "CMakeProject1.cpp" "CMakeProject1.h")
-# add_executable (CcCvStore "server.c")
-# add_executable (CcCvStore "server2.c")
 ADD_LIBRARY(sqlite3 STATIC sqlite3.h sqlite3.c sqlite3ext.h)
 
 ADD_LIBRARY(LibsModule 
+  ini.h
   ht.h
   sts_queue.c
   add_lib.c
@@ -35,6 +33,8 @@ ADD_LIBRARY(LibsModule
   disc_data/disc_types.h
   disc_data/disc_data.c
 
+  config.c
+  ini.c
   task.c
   msg_parser.c
   thread_connection.c
@@ -54,6 +54,7 @@ find_package(Threads REQUIRED)
 # add_executable (CcCvStore "test_task.c")
 add_executable (CcCvStore "server.c")
 #add_executable (CcCvStore "test_mutex.c")
+#add_executable (CcCvStore "test_ini.c")
 # add_executable (CcCvStore "test_sql.c")
 #add_executable (CcCvStore "test_server.c")
 #add_executable (CcCvStore "test_str.c")

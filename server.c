@@ -124,6 +124,8 @@ int main_server() {
   puts("EXIT");
 
   sem_destroy(&sem_task);
+
+  free(conf);
 }
 
 void main_client() {

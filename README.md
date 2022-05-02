@@ -18,16 +18,15 @@
 
 ### Записать значение
 
-        1|mykey|myvalue
+        1|mykey|myvalue|
 
 ### Получить значение
 
-        2|mykey
+        2|mykey|
 
 ### Удалить значение
 
-        3|mykey
-
+        3|mykey| 
 
 
 Пример клиента на nodejs
