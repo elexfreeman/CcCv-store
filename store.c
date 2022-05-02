@@ -1,7 +1,7 @@
 #ifndef _STORE_C
 #define _STORE_C
 
-#include <sqlite3.h>
+#include "sqlite3.h"
 #include <stdio.h>
 #include <stdlib.h> //strlen
 #include <string.h> //strlen
