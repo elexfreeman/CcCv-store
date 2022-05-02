@@ -33,6 +33,7 @@ ADD_LIBRARY(LibsModule
   disc_data/disc_types.h
   disc_data/disc_data.c
 
+  config.c
   ini.c
   task.c
   msg_parser.c
@@ -51,9 +52,9 @@ find_package(Threads REQUIRED)
 # add_executable (CcCvStore "test.c")
 #add_executable (CcCvStore "test_add_lib.c")
 # add_executable (CcCvStore "test_task.c")
-#add_executable (CcCvStore "server.c")
+add_executable (CcCvStore "server.c")
 #add_executable (CcCvStore "test_mutex.c")
-add_executable (CcCvStore "test_ini.c")
+#add_executable (CcCvStore "test_ini.c")
 # add_executable (CcCvStore "test_sql.c")
 #add_executable (CcCvStore "test_server.c")
 #add_executable (CcCvStore "test_str.c")

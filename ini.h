@@ -176,4 +176,6 @@ INI_API int ini_parse_string(const char *string, ini_handler handler,
 }
 #endif
 
+#define MATCH_CONF_VARS(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+
 #endif /* INI_H */

@@ -1,6 +1,6 @@
 
-#ifndef _DISC_ TYPES_C
-#define _DISC_TYPES_C
+#ifndef _DISC_TYPES_H
+#define _DISC_TYPES_H
 
 #include <stdio.h>
 #include <string.h>

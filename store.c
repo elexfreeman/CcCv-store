@@ -67,6 +67,7 @@ void *store_get(char *key) {
     sqlite3_bind_text(p_stmt, 1, key, strlen(key), SQLITE_TRANSIENT);
   } else {
     fprintf(stderr, "ERROR SQL get: %s\n", sqlite3_errmsg(db));
+    return NULL;
   }
 
   int step = sqlite3_step(p_stmt);
@@ -112,11 +113,7 @@ int store_remove(char *key) {
 
   if (ret != SQLITE_DONE) {
     fprintf(stderr, "ERROR SQL remove: %s\n", sqlite3_errmsg(db));
-    return 1;
-  }
-
-  if (rc != SQLITE_OK) {
-    fprintf(stderr, "ERROR SQL remove: %s\n", sqlite3_errmsg(db));
+    return 0;
   }
 
   return 1;
@@ -162,12 +159,9 @@ int store_set(char *key, char *val) {
 
   if (ret != SQLITE_DONE) {
     fprintf(stderr, "ERROR SQL set: %s\n", sqlite3_errmsg(db));
-    return 1;
+    return 0;
   }
 
-  if (rc != SQLITE_OK) {
-    fprintf(stderr, "ERROR SQL set: %s\n", sqlite3_errmsg(db));
-  }
 
   return 1;
 }

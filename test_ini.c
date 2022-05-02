@@ -14,10 +14,9 @@ static int handler(void *user, const char *section, const char *name,
                    const char *value) {
   configuration *pconfig = (configuration *)user;
 
-#define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
-  if (MATCH("server", "port")) {
+  if (MATCH_CONF_VARS("server", "host")) {
     pconfig->host = strdup(value);
-  } else if (MATCH("server", "port")) {
+  } else if (MATCH_CONF_VARS("server", "port")) {
     pconfig->port = atoi(value);
   } else {
     return 0; /* unknown section/name, error */
