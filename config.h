@@ -17,8 +17,7 @@
 struct stru_config {
   int port;
   char *address;
-  char *data_file_name;
-  char *store_file; /* Database filename (UTF-8) */
+  char *db_file; /* Database filename (UTF-8) */
 };
 
 

@@ -16,3 +16,4 @@ CcCvStore
 build
 test.txt
 *.db
+*.ini

@@ -17,8 +17,14 @@ int store_init(struct stru_config *config) {
 
   char *err_msg = 0;
   sqlite3_stmt *statement;
+  int rc = 0;
 
-  int rc = sqlite3_open(":memory:", &db);
+  if (config->db_file == NULL) {
+    int rc = sqlite3_open(":memory:", &db);
+
+  } else {
+    int rc = sqlite3_open(config->db_file, &db);
+  }
   // int rc = sqlite3_open("file::memory:?cache=shared", &db);
   // int rc = sqlite3_open("file::memory:", &db);
   // int rc = sqlite3_open(config->data_file_name, &db);
@@ -127,7 +133,6 @@ int store_close() {
   return 1;
 }
 
-
 int store_set(char *key, char *val) {
   int rc = 0;
   int ret = 0;
@@ -161,7 +166,6 @@ int store_set(char *key, char *val) {
     fprintf(stderr, "ERROR SQL set: %s\n", sqlite3_errmsg(db));
     return 0;
   }
-
 
   return 1;
 }

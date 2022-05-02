@@ -53,10 +53,7 @@ int main_server() {
   g_queue_task_in = StsQueue.create();
   g_store = ht_create();
 
-  struct stru_config *conf = malloc(sizeof(struct stru_config));
-  conf->address = 0;
-  conf->data_file_name = "database.db";
-
+  struct stru_config *conf = malloc(sizeof(struct stru_config)); 
   store_init(conf);
 
   if (pthread_create(&sniffer_thread_disc_sync, NULL, thread_disc_sync, NULL) <
