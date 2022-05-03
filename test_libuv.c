@@ -78,7 +78,17 @@ void on_new_connection(uv_stream_t *server, int status) {
 }
 
 int main() {
-  fprintf(stdout, "server start at 0.0.0.0:%d r\n", DEFAULT_PORT);
+  if (init_config() == 0) {
+    fprintf(stdout, "ERROR: bad config file r\n");
+    return 1;
+  }
+
+  struct stru_config *config = get_config();
+  if (config == NULL) {
+    fprintf(stdout, "Empty config r\n");
+  }
+  fprintf(stdout, "server start at 0.0.0.0:%d r\n", config->port);
+  return 0;
   loop = uv_default_loop();
 
   uv_tcp_t server;

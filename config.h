@@ -20,12 +20,10 @@ struct stru_config {
   char *db_file; /* Database filename (UTF-8) */
 };
 
-static struct stru_config* config;
 
 struct stru_config *get_config();
 
-void init_config();
+int init_config();
 
-static int is_config_init = 0;
 
 #endif

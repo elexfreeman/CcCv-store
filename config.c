@@ -1,41 +1,48 @@
 #include "config.h"
 
+static struct stru_config *config;
+static int is_config_init = 0;
+
 static int handler(void *data, const char *section, const char *name,
                    const char *value) {
   struct stru_config *pconfig = (struct stru_config *)data;
 
   if (MATCH_CONF_VARS("server", "host")) {
-    pconfig->address = strdup(value);
+    config->address = strdup(value);
   }
   if (MATCH_CONF_VARS("server", "port")) {
-    pconfig->port = atoi(value);
+    config->port = atoi(value);
+    fprintf(stdout, "port: %d \r\n", config->port);
   }
   if (MATCH_CONF_VARS("store", "db_file")) {
-    pconfig->db_file = strdup(value);
+    config->db_file = strdup(value);
   }
   return 1;
 }
 
-void init_config() {
+int init_config() {
+  if (is_config_init == 1) {
+    return 1;
+  }
   config = (struct stru_config *)malloc(sizeof(struct stru_config));
-  config->port = 0;
-  config->address = NULL;
+  config->port = SERVER_DEFAULT_PORT_NUM;
+  config->address = "0.0.0.0";
   config->db_file = NULL;
 
   if (ini_parse("CcCvStore.ini", handler, &config) < 0) {
-    printf("Can't load 'CcCvStore.ini'\n");
-    return;
+    fprintf(stderr, "init_config done \r\n");
+    return 0;
   }
 
+
   is_config_init = 1;
+  return 1;
 }
 
 struct stru_config *get_config() {
-
   if (is_config_init == 0) {
     return NULL;
   }
-
   return config;
 }
 
