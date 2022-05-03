@@ -110,7 +110,7 @@ int main_server() {
         accept(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c);
 
     if (client_sock >= 0) {
-      puts("Connection accepted");
+      printf("Conn accept %d \r\n", client_sock);
 
       pthread_t sniffer_thread;
       new_sock = malloc(1);

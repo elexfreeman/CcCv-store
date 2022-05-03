@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define SERVER_DEFAULT_PORT_NUM 8888
+#define SERVER_MAX_CONNECTION 12
 #define MAX_KEY_SIZE 128
 #define MAX_VALUE_SIZE 2048
 #define CMD_SIZE 1
@@ -18,6 +19,7 @@ struct stru_config {
   int port;
   char *address;
   char *db_file; /* Database filename (UTF-8) */
+  int max_connection;
 };
 
 

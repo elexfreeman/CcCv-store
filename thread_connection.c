@@ -54,18 +54,21 @@ void *thread_connection(void *socket_desc) {
 
   while (IS_APP_TRM) {
 
-  timeout.tv_sec = 1;
-  timeout.tv_usec = 0;
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
 
     FD_ZERO(&read_sd);
     FD_SET(sock, &read_sd);
-    sel = select(sock+1, &read_sd, 0, 0, &timeout);
-    // sel = select(sock, &read_sd, 0, 0, NULL);
-    if (sel > 0) {
+    // sel = select(sock + 1, &read_sd, 0, 0, &timeout);
+ //   sel = select(FD_SETSIZE , &read_sd, 0, 0, NULL);
+//    if (sel > 0) {
 
       void *buff = malloc(CLIENT_MSG_SIZE);
       // client has performed some activity (sent data or disconnected?)
+      printf("start read \r\n");
       read_size = recv(sock, buff, CLIENT_MSG_SIZE, 0);
+      
+      printf("read done \r\n");
 
       if (read_size > 0) {
         tasks_branch(sock, buff);
@@ -89,10 +92,7 @@ void *thread_connection(void *socket_desc) {
         free(buff);
         break;
       }
-    } else if (sel < 0) {
-      // grave error occurred.
-      break;
-    }
+//    } else if (sel < 0) {  break; }
   }
   close(*((int *)socket_desc));
   puts("Client disconnected");

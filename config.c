@@ -12,6 +12,9 @@ static int handler(void *user, const char *section, const char *name, const char
   if (MATCH_CONF_VARS("store", "db_file")) {
     pconfig->db_file = strdup(value);
   } 
+  if (MATCH_CONF_VARS("server", "max_connection")) {
+    pconfig->port = atoi(value);
+  } 
   return 1;
 }
 
