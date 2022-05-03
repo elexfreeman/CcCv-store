@@ -32,8 +32,10 @@ ADD_LIBRARY(LibsModule
   config.h
   disc_data/disc_types.h
   disc_data/disc_data.c
+  router.h
 
   config.c
+
   ini.c
   task.c
   msg_parser.c
@@ -41,6 +43,7 @@ ADD_LIBRARY(LibsModule
   thread_task_manager.c
   thread_disc_sync.c
   store.c
+  router.c
 )
 
 find_package(Threads REQUIRED)

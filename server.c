@@ -5,13 +5,13 @@
 
 #include <arpa/inet.h> //inet_addr
 #include <pthread.h>   //for threading , link with lpthread
+#include <semaphore.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h> //strlen
 #include <string.h> //strlen
 #include <sys/socket.h>
 #include <unistd.h> //write
-#include <semaphore.h>
 
 #include "ht.c"
 #include "sts_queue.c"
@@ -25,26 +25,30 @@
 #include "thread_disc_sync.c"
 #include "thread_task_manager.c"
 
+void set_termitate() {
+
+}
 
 void sig_handler(int sig) {
+  printf("signal: %d \n", sig);
   switch (sig) {
   case SIGSEGV:
-    fprintf(stderr, "give out a backtrace or something...\n");
-    abort();
+    set_termitate();
+  case SIGTERM:
+    set_termitate();
   default:
-    fprintf(stderr, "wasn't expecting that!\n");
-    abort();
+    set_termitate();
   }
 }
 
+
 int main_server() {
   pthread_t sniffer_thread_tasks_01;
-//  pthread_t sniffer_thread_tasks_02;
+  //  pthread_t sniffer_thread_tasks_02;
 
   sem_init(&sem_task, 0, 1);
 
   pthread_t sniffer_thread_disc_sync;
-
 
   int socket_desc, client_sock, c, *new_sock;
   struct sockaddr_in server, client;
@@ -53,7 +57,7 @@ int main_server() {
   g_queue_task_in = StsQueue.create();
   g_store = ht_create();
 
-  struct stru_config *conf = malloc(sizeof(struct stru_config)); 
+  struct stru_config *conf = malloc(sizeof(struct stru_config));
   store_init(conf);
 
   if (pthread_create(&sniffer_thread_disc_sync, NULL, thread_disc_sync, NULL) <
@@ -63,8 +67,8 @@ int main_server() {
   }
 
   // thread for process tasks
-  if (pthread_create(&sniffer_thread_tasks_01, NULL, thread_task_manager, NULL) <
-      0) {
+  if (pthread_create(&sniffer_thread_tasks_01, NULL, thread_task_manager,
+                     NULL) < 0) {
     perror("could not create thread");
     return 1;
   }
@@ -117,7 +121,7 @@ int main_server() {
   }
 
   pthread_join(sniffer_thread_tasks_01, NULL);
-//  pthread_join(sniffer_thread_tasks_02, NULL);
+  //  pthread_join(sniffer_thread_tasks_02, NULL);
   puts("EXIT");
 
   sem_destroy(&sem_task);
@@ -170,7 +174,9 @@ void main_client() {
 }
 
 int main(int argc, char *argv[]) {
-  signal(SIGSEGV, sig_handler);
+  if (signal(SIGINT, sig_handler) == SIG_ERR)
+    printf("\ncan't catch SIGINT\n");
+
   int i;
   bool is_server = true;
   printf("The following arguments were passed to main(): ");

@@ -4,14 +4,8 @@
 #include <string.h>
 #include <uv.h>
 
-#include "add_lib.c"
 #include "config.h"
-#include "global.h"
-#include "task.c"
-
-#include "thread_connection.c"
-#include "thread_disc_sync.c"
-#include "thread_task_manager.c"
+#include "router.h"
 
 #define DEFAULT_BACKLOG 128
 
@@ -39,19 +33,23 @@ void on_close(uv_handle_t *handle) {
   free(handle);
 }
 
-void echo_write(uv_write_t *req, int status) {
+void on_write_cb(uv_write_t *req, int status) {
   if (status) {
     fprintf(stderr, "Write error %s\n", uv_strerror(status));
   }
   free_write_req(req);
 }
 
-void echo_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
+void on_read_cb(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
+  if (nread == 0) {
+    fprintf(stdout, "read 0\n");
+  }
   if (nread > 0) {
     fprintf(stdout, ">> %s\n", (char *)buf->base);
     write_req_t *req = (write_req_t *)malloc(sizeof(write_req_t));
-    req->buf = uv_buf_init(buf->base, nread);
-    uv_write((uv_write_t *)req, client, &req->buf, 1, echo_write);
+    char *p_data = router(1, buf->base);
+    req->buf = uv_buf_init(p_data, sizeof(p_data));
+    uv_write((uv_write_t *)req, client, &req->buf, 1, on_write_cb);
     return;
   }
   if (nread < 0) {
@@ -76,7 +74,7 @@ void on_new_connection(uv_stream_t *server, int status) {
   uv_tcp_t *client = (uv_tcp_t *)malloc(sizeof(uv_tcp_t));
   uv_tcp_init(loop, client);
   if (uv_accept(server, (uv_stream_t *)client) == 0) {
-    uv_read_start((uv_stream_t *)client, alloc_buffer, echo_read);
+    uv_read_start((uv_stream_t *)client, alloc_buffer, on_read_cb);
   } else {
     fprintf(stdout, "client exit");
     uv_close((uv_handle_t *)client, on_close);
@@ -91,16 +89,20 @@ void app_finish() {
 }
 
 void sig_handler(int sig) {
+  printf("signal: %d \n", sig);
   switch (sig) {
   case SIGSEGV:
+    app_finish();
+  case SIGTERM:
     app_finish();
   default:
     app_finish();
   }
 }
-
 int main() {
-  signal(SIGSEGV, sig_handler);
+  if (signal(SIGINT, sig_handler) == SIG_ERR)
+    printf("\ncan't catch SIGINT\n");
+
   if (init_config() == 0) {
     fprintf(stdout, "ERROR: bad config file r\n");
     return 1;

@@ -13,6 +13,11 @@
 #include "task.c"
 
 int parse_client_msg_cmd(const char *msg) {
+    fprintf(stdout, "parse start \n");
+  if (msg == NULL) {
+    fprintf(stdout, "parse NULL \n");
+    return 0;
+  }
   int cmd = 0;
   if (msg[0] == '1') {
     cmd = CMD_SET;
@@ -92,7 +97,6 @@ struct stru_task_set *parse_client_msg_set(int sock, const char *msg) {
   }
   resp->data = data;
   resp->key = key;
-
 
   return resp;
 }
