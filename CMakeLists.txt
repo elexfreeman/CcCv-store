@@ -52,7 +52,8 @@ find_package(Threads REQUIRED)
 # add_executable (CcCvStore "test.c")
 #add_executable (CcCvStore "test_add_lib.c")
 # add_executable (CcCvStore "test_task.c")
-add_executable (CcCvStore "server.c")
+add_executable (CcCvStore "test_libuv.c")
+#add_executable (CcCvStore "server.c")
 #add_executable (CcCvStore "test_mutex.c")
 #add_executable (CcCvStore "test_ini.c")
 # add_executable (CcCvStore "test_sql.c")
@@ -64,6 +65,11 @@ target_link_libraries(LibsModule Threads::Threads)
 
 target_link_libraries(sqlite3 -lpthread -ldl -lm)
 
+find_library(LIBUV_LIBRARIES NAMES uv libuv HINTS $ENV{LIBUV_ROOT})
+target_link_libraries(CcCvStore PUBLIC ${LIBUV_LIBRARIES})
+
 target_link_libraries(CcCvStore PUBLIC LibsModule)
 target_link_libraries(CcCvStore PUBLIC sqlite3)
+
+
 
