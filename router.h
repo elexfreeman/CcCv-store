@@ -1,8 +1,7 @@
 #ifndef _ROUTER_H
 #define _ROUTER_H
+#include <uv.h>
 
-
-char *router(int sock, void *buff);
-
+char *router(const uv_buf_t *buf); 
 
 #endif

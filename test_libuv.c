@@ -40,6 +40,12 @@ void on_write_cb(uv_write_t *req, int status) {
   free_write_req(req);
 }
 
+static void rr(const uv_buf_t *buf) {
+  void *p_base = malloc(buf->len);
+  memcpy(p_base, buf->base, buf->len);
+  fprintf(stdout, "rr %u %d \n", (int)sizeof(p_base), (int)buf->len);
+}
+
 void on_read_cb(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
   if (nread == 0) {
     fprintf(stdout, "read 0\n");
@@ -47,7 +53,17 @@ void on_read_cb(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
   if (nread > 0) {
     fprintf(stdout, ">> %s\n", (char *)buf->base);
     write_req_t *req = (write_req_t *)malloc(sizeof(write_req_t));
-    char *p_data = router(1, buf->base);
+
+    void *p_base = malloc(buf->len);
+    memcpy(p_base, buf->base, buf->len);
+    fprintf(stdout, ">>p_base= %s\n", (char *)p_base);
+    fprintf(stdout, "cmd %d %d \n", (int)sizeof(p_base), (int)buf->len);
+
+    rr(buf);
+
+
+    void *p_data = router(buf);
+
     req->buf = uv_buf_init(p_data, sizeof(p_data));
     uv_write((uv_write_t *)req, client, &req->buf, 1, on_write_cb);
     return;

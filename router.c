@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h> //strlen
 #include <string.h> //strlen
+#include <uv.h>
 
 #include "config.h"
 #include "msg_parser.c"
@@ -87,11 +88,15 @@ static char *route_get(struct stru_task *task) {
   return msg;
 }
 
-char *router(void *buff) {
+char *router(const uv_buf_t *buf) {
   int cmd;
   char *resp;
   // got data from the client.
-  fprintf(stdout, "cmd \n");
+
+  fprintf(stdout, "router \n");
+  fprintf(stdout, "router %u  \n", (int)buf->len );
+
+  char buff[] = "asdasd";
   cmd = parse_client_msg_cmd((char*)buff);
 
   if (cmd == CMD_SET) {

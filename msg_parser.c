@@ -13,11 +13,14 @@
 #include "task.c"
 
 int parse_client_msg_cmd(const char *msg) {
-    fprintf(stdout, "parse start \n");
+  fprintf(stdout, "parse start \n");
   if (msg == NULL) {
     fprintf(stdout, "parse NULL \n");
     return 0;
   }
+
+  fprintf(stdout, "parse %s \n", msg);
+  fprintf(stdout, "parse start \n");
   int cmd = 0;
   if (msg[0] == '1') {
     cmd = CMD_SET;
