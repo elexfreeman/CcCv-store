@@ -1,5 +1,7 @@
 #ifndef _ROUTER_C
 #define _ROUTER_C
+#include "router.h"
+
 #include <stdio.h>
 #include <stdlib.h> //strlen
 #include <string.h> //strlen
@@ -11,112 +13,94 @@
 #include "task.c"
 
 static char *route_delete(struct stru_task *task) {
-  struct stru_task_delete *task_data;
-
-  if (!check_task(task)) {
-    return NULL;
-  }
-
   if (task->cmd != CMD_DELETE)
     return NULL;
 
-  if (task->data == NULL)
-    return NULL;
+  int msg_len = strlen(task->key) + 4;
+  char *msg = (char *)malloc(msg_len);
 
-  task_data = (struct stru_task_delete *)task->data;
-
-  store_remove(task_data->key);
-  char *msg = malloc(3 + strlen(task_data->key));
-  snprintf(msg, CLIENT_MSG_SIZE, "3|%s|", task_data->key);
+  store_remove(task->key);
+  snprintf(msg, msg_len, "3|%s|", task->key);
 
   return msg;
 }
 
 static char *route_set(struct stru_task *task) {
-  struct stru_task_set *task_data;
-
-  if (!check_task(task)) {
-    return NULL;
-  }
 
   if (task->cmd != CMD_SET)
     return NULL;
 
-  if (task->data == NULL)
+  if (task->data == NULL) {
     return NULL;
+  }
 
-  task_data = (struct stru_task_set *)task->data;
-  store_set(task_data->key, task_data->data);
+  store_set(task->key, task->data);
 
   // send confirm set data
-  char *msg = malloc(3 + strlen(task_data->key));
-  snprintf(msg, CLIENT_MSG_SIZE, "1|%s|", task_data->key);
+  int msg_len = strlen(task->key) + 4;
+  char *msg = (char *)malloc(msg_len);
 
-  free(task_data);
+  snprintf(msg, msg_len, "1|%s|", task->key);
 
   return msg;
 }
 
 static char *route_get(struct stru_task *task) {
-  struct stru_task_get *task_data;
-  void *ptr_data;
-
-  if (!check_task(task)) {
-    return NULL;
-  }
+  char *p_data;
 
   if (task->cmd != CMD_GET)
     return NULL;
 
-  if (task->data == NULL)
-    return NULL;
+  p_data = (char *)store_get(task->key);
 
-  task_data = (struct stru_task_get *)task->data;
-  ptr_data = store_get(task_data->key);
+  char *msg = NULL;
 
-  // TODO: calc msg size
-  char *msg = malloc(CLIENT_MSG_SIZE);
-  if (ptr_data) {
-    snprintf(msg, CLIENT_MSG_SIZE, "2|%s|%s", task_data->key, (char *)ptr_data);
+  if (p_data) {
+    int msg_len = strlen(task->key) + 4 + strlen(p_data);
+    msg = (char *)malloc(msg_len);
+    snprintf(msg, msg_len, "2|%s|%s", task->key, (char *)p_data);
   } else {
-    snprintf(msg, CLIENT_MSG_SIZE, "2|%s|", task_data->key);
+    int msg_len = strlen(task->key) + 4;
+    msg = (char *)malloc(msg_len);
+    snprintf(msg, msg_len, "2|%s|", task->key);
   }
 
-  free(msg);
-  free(task_data);
+  free(p_data);
 
   return msg;
 }
 
 char *router(const uv_buf_t *buf) {
   int cmd;
-  char *resp;
-  // got data from the client.
+  char *resp = NULL;
+  struct stru_task *task = parse_client_msg(buf);
 
-  fprintf(stdout, "router \n");
-  fprintf(stdout, "router %u  \n", (int)buf->len );
-
-  char buff[] = "asdasd";
-  cmd = parse_client_msg_cmd((char*)buff);
-
-  if (cmd == CMD_SET) {
-    struct stru_task *task = malloc(sizeof(struct stru_task *));
-    task->cmd = CMD_SET;
-    fprintf(stdout, "1 \n");
-    task->data = parse_client_msg_set(1, buff);
-    fprintf(stdout, "2 \n");
+  if (task->cmd == CMD_SET) {
     resp = route_set(task);
-  } else if (cmd == CMD_GET) {
-    struct stru_task *task = malloc(sizeof(struct stru_task *));
-    task->cmd = CMD_GET;
-    task->data = parse_client_msg_get(1, buff);
+  }
+
+  if (task->cmd == CMD_GET) {
+    fprintf(stdout, "router cmd get  \n");
     resp = route_get(task);
-  } else if (cmd == CMD_DELETE) {
-    struct stru_task *task = malloc(sizeof(struct stru_task *));
-    task->cmd = CMD_DELETE;
-    task->data = parse_client_msg_delete(1, buff);
+  }
+
+  if (task->cmd == CMD_DELETE) {
     resp = route_delete(task);
   }
+
+  if (resp == NULL) {
+    // send confirm set data
+    int msg_len = strlen(task->key) + 4;
+    char *msg = (char *)malloc(msg_len);
+    snprintf(msg, msg_len, "%d|%s|", task->cmd, task->key);
+  }
+
+  if (resp == NULL) {
+    resp = (char *)malloc(1);
+    snprintf(resp, 1, "0");
+  }
+
+  free_msg(task);
 
   return resp;
 }

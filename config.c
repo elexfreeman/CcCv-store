@@ -1,4 +1,7 @@
 #include "config.h"
+#include "ini.h"
+#include <stdlib.h> //strlen
+#include <string.h>
 
 static struct stru_config *config;
 static int is_config_init = 0;

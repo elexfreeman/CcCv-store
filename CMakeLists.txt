@@ -26,24 +26,22 @@ ADD_LIBRARY(sqlite3 STATIC sqlite3.h sqlite3.c sqlite3ext.h)
 ADD_LIBRARY(LibsModule 
   ini.h
   ht.h
-  sts_queue.c
-  add_lib.c
   global.h
   config.h
   disc_data/disc_types.h
   disc_data/disc_data.c
   router.h
+  store.h
+
 
   config.c
-
+  sts_queue.c
+  add_lib.c 
   ini.c
   task.c
   msg_parser.c
-  thread_connection.c
-  thread_task_manager.c
-  thread_disc_sync.c
-  store.c
   router.c
+  store.c
 )
 
 find_package(Threads REQUIRED)
@@ -56,6 +54,7 @@ find_package(Threads REQUIRED)
 #add_executable (CcCvStore "test_add_lib.c")
 # add_executable (CcCvStore "test_task.c")
 add_executable (CcCvStore "test_libuv.c")
+#add_executable (CcCvStore "test_parce.c")
 #add_executable (CcCvStore "server.c")
 #add_executable (CcCvStore "test_mutex.c")
 #add_executable (CcCvStore "test_ini.c")

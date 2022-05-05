@@ -1,9 +1,6 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#include "ini.h"
-#include <stdlib.h> //strlen
-#include <string.h>
 
 #define SERVER_DEFAULT_PORT_NUM 8888
 #define MAX_KEY_SIZE 128
