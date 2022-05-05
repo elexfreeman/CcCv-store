@@ -80,7 +80,6 @@ char *router(const uv_buf_t *buf) {
   }
 
   if (task->cmd == CMD_GET) {
-    fprintf(stdout, "router cmd get  \n");
     resp = route_get(task);
   }
 
@@ -89,15 +88,8 @@ char *router(const uv_buf_t *buf) {
   }
 
   if (resp == NULL) {
-    // send confirm set data
-    int msg_len = strlen(task->key) + 4;
-    char *msg = (char *)malloc(msg_len);
-    snprintf(msg, msg_len, "%d|%s|", task->cmd, task->key);
-  }
-
-  if (resp == NULL) {
     resp = (char *)malloc(1);
-    snprintf(resp, 1, "0");
+    snprintf(resp, 2, "0");
   }
 
   free_msg(task);

@@ -1,199 +1,136 @@
 
-/*
-    simple implementation of key-value store
-*/
-
-#include <arpa/inet.h> //inet_addr
-#include <pthread.h>   //for threading , link with lpthread
-#include <semaphore.h>
-#include <signal.h>
 #include <stdio.h>
-#include <stdlib.h> //strlen
-#include <string.h> //strlen
-#include <sys/socket.h>
-#include <unistd.h> //write
+#include <stdlib.h>
+#include <string.h>
+#include <uv.h>
 
-#include "ht.c"
-#include "sts_queue.c"
-
-#include "add_lib.c"
 #include "config.h"
-#include "global.h"
-#include "task.c"
+#include "router.h"
+#include "store.h"
 
-#include "thread_connection.c"
-#include "thread_disc_sync.c"
-#include "thread_task_manager.c"
+#define DEFAULT_BACKLOG 128
 
-void set_termitate() {
+uv_loop_t *loop;
+struct sockaddr_in addr;
 
+typedef struct {
+  uv_write_t req;
+  uv_buf_t buf;
+} write_req_t;
+
+void free_write_req(uv_write_t *req) {
+  write_req_t *wr = (write_req_t *)req;
+  free(wr->buf.base);
+  free(wr);
+}
+
+void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+  buf->base = (char *)malloc(suggested_size);
+  buf->len = suggested_size;
+}
+
+void on_close(uv_handle_t *handle) {
+  fprintf(stdout, "on_close \r\n");
+  free(handle);
+}
+
+void on_write_cb(uv_write_t *req, int status) {
+  if (status) {
+    fprintf(stderr, "Write error %s\n", uv_strerror(status));
+  }
+  free_write_req(req);
+}
+
+
+void on_read_cb(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf) {
+  if (nread > 0) {
+    fprintf(stdout, ":>%s\n", (char *)buf->base);
+    write_req_t *req = (write_req_t *)malloc(sizeof(write_req_t));
+
+    void *p_data = router(buf); 
+
+    req->buf = uv_buf_init(p_data, strlen(p_data));
+
+    uv_write((uv_write_t *)req, client, &req->buf, 1, on_write_cb);
+    return;
+  }
+  if (nread < 0) {
+    if (nread != UV_EOF) {
+      fprintf(stderr, "Read error %s\n", uv_err_name(nread));
+    }
+    fprintf(stdout, "end read \r\n");
+    uv_close((uv_handle_t *)client, on_close);
+  }
+
+  free(buf->base);
+}
+
+void on_new_connection(uv_stream_t *server, int status) {
+  if (status < 0) {
+    fprintf(stderr, "New connection error %s\n", uv_strerror(status));
+    // error!
+    return;
+  }
+
+  fprintf(stdout, "New client connected \r\n");
+  uv_tcp_t *client = (uv_tcp_t *)malloc(sizeof(uv_tcp_t));
+  uv_tcp_init(loop, client);
+  if (uv_accept(server, (uv_stream_t *)client) == 0) {
+    uv_read_start((uv_stream_t *)client, alloc_buffer, on_read_cb);
+  } else {
+    fprintf(stdout, "client exit");
+    uv_close((uv_handle_t *)client, on_close);
+  }
+}
+
+void app_finish() {
+  struct stru_config *config = get_config();
+  free(config);
+  fprintf(stdout, "App exit...\n");
+  abort();
 }
 
 void sig_handler(int sig) {
   printf("signal: %d \n", sig);
   switch (sig) {
   case SIGSEGV:
-    set_termitate();
+    app_finish();
   case SIGTERM:
-    set_termitate();
+    app_finish();
   default:
-    set_termitate();
+    app_finish();
   }
 }
-
-
-int main_server() {
-  pthread_t sniffer_thread_tasks_01;
-  //  pthread_t sniffer_thread_tasks_02;
-
-  sem_init(&sem_task, 0, 1);
-
-  pthread_t sniffer_thread_disc_sync;
-
-  int socket_desc, client_sock, c, *new_sock;
-  struct sockaddr_in server, client;
-  char *message = "Heleleoe client";
-
-  g_queue_task_in = StsQueue.create();
-  g_store = ht_create();
-
-  struct stru_config *conf = malloc(sizeof(struct stru_config));
-  store_init(conf);
-
-  if (pthread_create(&sniffer_thread_disc_sync, NULL, thread_disc_sync, NULL) <
-      0) {
-    perror("could not create thread disc sync");
-    return 1;
-  }
-
-  // thread for process tasks
-  if (pthread_create(&sniffer_thread_tasks_01, NULL, thread_task_manager,
-                     NULL) < 0) {
-    perror("could not create thread");
-    return 1;
-  }
-
-  // Create socket
-  socket_desc = socket(AF_INET, SOCK_STREAM, 0);
-  if (socket_desc == -1) {
-    printf("Could not create socket");
-  }
-  puts("Socket created");
-
-  // Prepare the sockaddr_in structure
-  server.sin_family = AF_INET;
-  server.sin_addr.s_addr = INADDR_ANY;
-  server.sin_port = htons(SERVER_DEFAULT_PORT_NUM);
-
-  // Bind
-  if (bind(socket_desc, (struct sockaddr *)&server, sizeof(server)) < 0) {
-    // print the error message
-    perror("bind failed. Error");
-    return 1;
-  }
-  puts("bind done");
-
-  // Listen
-  listen(socket_desc, 3);
-
-  // Accept and incoming connection
-  puts("Waiting for incoming connections...");
-  c = sizeof(struct sockaddr_in);
-
-  while (1) {
-    client_sock =
-        accept(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c);
-
-    puts("Connection accepted");
-
-    pthread_t sniffer_thread;
-    new_sock = malloc(1);
-    *new_sock = client_sock;
-
-    if (pthread_create(&sniffer_thread, NULL, thread_connection,
-                       (void *)new_sock) < 0) {
-      perror("could not create thread");
-      return 1;
-    }
-
-    // Now join the thread , so that we dont terminate before the thread
-    pthread_join(sniffer_thread, NULL);
-  }
-
-  pthread_join(sniffer_thread_tasks_01, NULL);
-  //  pthread_join(sniffer_thread_tasks_02, NULL);
-  puts("EXIT");
-
-  sem_destroy(&sem_task);
-
-  free(conf);
-}
-
-void main_client() {
-  int sockfd, numbytes;
-  char buf[CLIENT_MSG_SIZE];
-  struct hostent *he;
-  struct sockaddr_in their_addr; /* connector's address information */
-
-  if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-    perror("socket");
-    exit(1);
-  }
-
-  their_addr.sin_family = AF_INET; /* host byte order */
-  their_addr.sin_port =
-      htons(SERVER_DEFAULT_PORT_NUM); /* short, network byte order */
-  their_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-  bzero(&(their_addr.sin_zero), 8); /* zero the rest of the struct */
-
-  if (connect(sockfd, (struct sockaddr *)&their_addr,
-              sizeof(struct sockaddr)) == -1) {
-    perror("connect");
-    exit(1);
-  }
-  while (1) {
-    if (send(sockfd, "Hello, world!\n", 14, 0) == -1) {
-      perror("send");
-      exit(1);
-    }
-    printf("After the send function \n");
-
-    if ((numbytes = recv(sockfd, buf, CLIENT_MSG_SIZE, 0)) == -1) {
-      perror("recv");
-      exit(1);
-    }
-
-    buf[numbytes] = '\0';
-
-    printf("Received in pid=%d, text=: %s \n", getpid(), buf);
-    sleep(1);
-  }
-
-  close(sockfd);
-}
-
-int main(int argc, char *argv[]) {
+int main() {
   if (signal(SIGINT, sig_handler) == SIG_ERR)
     printf("\ncan't catch SIGINT\n");
 
-  int i;
-  bool is_server = true;
-  printf("The following arguments were passed to main(): ");
-  for (i = 1; i < argc; i++) {
-    printf("arg = %s", argv[i]);
-    if (i == 1) {
-      if (strcmp(argv[i], "client")) {
-        is_server = false;
-        main_client();
-      }
-    }
-  }
-  printf("%s ", argv[i]);
-
-  if (is_server) {
-    return main_server();
+  if (init_config() == 0) {
+    fprintf(stdout, "ERROR: bad config file r\n");
+    return 1;
   }
 
-  return 0;
+  struct stru_config *config = get_config();
+  if (config == NULL) {
+    fprintf(stdout, "Empty config r\n");
+    return 1;
+  }
+
+  store_init(config);
+
+  fprintf(stdout, "server start at 0.0.0.0:%d \r\n", config->port);
+  loop = uv_default_loop();
+
+  uv_tcp_t server;
+  uv_tcp_init(loop, &server);
+
+  uv_ip4_addr("0.0.0.0", config->port, &addr);
+
+  uv_tcp_bind(&server, (const struct sockaddr *)&addr, 0);
+  int r = uv_listen((uv_stream_t *)&server, DEFAULT_BACKLOG, on_new_connection);
+  if (r) {
+    fprintf(stderr, "Listen error %s\n", uv_strerror(r));
+    return 1;
+  }
+  return uv_run(loop, UV_RUN_DEFAULT);
 }

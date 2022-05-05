@@ -28,8 +28,6 @@ ADD_LIBRARY(LibsModule
   ht.h
   global.h
   config.h
-  disc_data/disc_types.h
-  disc_data/disc_data.c
   router.h
   store.h
 
@@ -53,9 +51,8 @@ find_package(Threads REQUIRED)
 # add_executable (CcCvStore "test.c")
 #add_executable (CcCvStore "test_add_lib.c")
 # add_executable (CcCvStore "test_task.c")
-add_executable (CcCvStore "test_libuv.c")
 #add_executable (CcCvStore "test_parce.c")
-#add_executable (CcCvStore "server.c")
+add_executable (CcCvStore "server.c")
 #add_executable (CcCvStore "test_mutex.c")
 #add_executable (CcCvStore "test_ini.c")
 # add_executable (CcCvStore "test_sql.c")
