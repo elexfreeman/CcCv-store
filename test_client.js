@@ -1,3 +1,4 @@
+
 // Include Nodejs' net module.
 const net = require("net")
 const events = require("events");
@@ -82,6 +83,7 @@ class CcCvStore {
    */
   getData(key) {
     const msg = `2|${key}|`;
+    console.log(msg);
     return new Promise((resolve) => {
       this.myEmitter.on('event', (binData) => {
         let data = binData.toString();
@@ -115,24 +117,24 @@ const testSetData = (vCcCv) => {
 
 
 const testFn = async (vCcCv) => {
-  const count = 10;
+  const count = 10000;
   for (let k = 0; k < count; k++) {
-    let key = `kkhhhhh_${k}`;
-    await vCcCv.setData(key, `mydata ${k}`);
+    let key = `tkhhhhh_${k}`;
+    await vCcCv.setData(key, `tydata ${k}`);
   }
 
   for (let k = 0; k < count; k++) {
-    let key = `kkhhhhh_${k}`;
+    let key = `tkhhhhh_${k}`;
     key, await vCcCv.getData(key);
   }
 
   for (let k = 0; k < count; k++) {
-    let key = `kkhhhhh_${k}`;
+    let key = `tkhhhhh_${k}`;
     await vCcCv.removeData(key);
   }
 
   for (let k = 0; k < count; k++) {
-    let key = `kkhhhhh_${k}`;
+    let key = `tkhhhhh_${k}`;
     await vCcCv.getData(key);
   }
 }
@@ -143,9 +145,7 @@ async function main() {
 
   console.log('Connenced +++');
 
-  setInterval(async () => {
-    await testFn(vCcCv);
-  }, 100);
+  await testFn(vCcCv);
 }
 
 main();

@@ -26,20 +26,19 @@ ADD_LIBRARY(sqlite3 STATIC sqlite3.h sqlite3.c sqlite3ext.h)
 ADD_LIBRARY(LibsModule 
   ini.h
   ht.h
-  sts_queue.c
-  add_lib.c
   global.h
   config.h
-  disc_data/disc_types.h
-  disc_data/disc_data.c
+  router.h
+  store.h
+
 
   config.c
+  sts_queue.c
+  add_lib.c 
   ini.c
   task.c
   msg_parser.c
-  thread_connection.c
-  thread_task_manager.c
-  thread_disc_sync.c
+  router.c
   store.c
 )
 
@@ -52,6 +51,7 @@ find_package(Threads REQUIRED)
 # add_executable (CcCvStore "test.c")
 #add_executable (CcCvStore "test_add_lib.c")
 # add_executable (CcCvStore "test_task.c")
+#add_executable (CcCvStore "test_parce.c")
 add_executable (CcCvStore "server.c")
 #add_executable (CcCvStore "test_mutex.c")
 #add_executable (CcCvStore "test_ini.c")
@@ -64,6 +64,11 @@ target_link_libraries(LibsModule Threads::Threads)
 
 target_link_libraries(sqlite3 -lpthread -ldl -lm)
 
+find_library(LIBUV_LIBRARIES NAMES uv libuv HINTS $ENV{LIBUV_ROOT})
+target_link_libraries(CcCvStore PUBLIC ${LIBUV_LIBRARIES})
+
 target_link_libraries(CcCvStore PUBLIC LibsModule)
 target_link_libraries(CcCvStore PUBLIC sqlite3)
+
+
 

@@ -1,5 +1,6 @@
 #ifndef _STORE_C
 #define _STORE_C
+#include "store.h"
 
 #include "sqlite3.h"
 #include <stdio.h>
