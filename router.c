@@ -73,6 +73,7 @@ static char *route_get(struct stru_task *task) {
 char *router(const uv_buf_t *buf) {
   int cmd;
   char *resp = NULL;
+
   struct stru_task *task = parse_client_msg(buf);
 
   if (task->cmd == CMD_SET) {
