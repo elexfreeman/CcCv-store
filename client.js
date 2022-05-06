@@ -48,6 +48,7 @@ class CcCvStore {
     return new Promise((resolve) => {
       this.myEmitter.on('event', (binData) => {
         let data = binData.toString();
+        console.log(data);
         // example 2|mykey|mydata
         let aData = data.split('|');
         if ((aData[0] == '1') && (aData[1] == key)) {
@@ -115,7 +116,8 @@ const testSetData = (vCcCv) => {
 
 
 const testFn = async (vCcCv) => {
-  const count = 10;
+
+  const count = 1000;
   for (let k = 0; k < count; k++) {
     let key = `kkhhhhh_${k}`;
     await vCcCv.setData(key, `mydata ${k}`);
@@ -130,11 +132,6 @@ const testFn = async (vCcCv) => {
     let key = `kkhhhhh_${k}`;
     await vCcCv.removeData(key);
   }
-
-  for (let k = 0; k < count; k++) {
-    let key = `kkhhhhh_${k}`;
-    await vCcCv.getData(key);
-  }
 }
 
 async function main() {
@@ -142,9 +139,18 @@ async function main() {
   await vCcCv.connect();
 
   console.log('Connenced +++');
+  const count = 10;
+  for (let k = 0; k < count; k++) {
+    let key = `kkhhhhh_${k}`;
+    await vCcCv.setData(key, `mydata ${k}`);
+  }
 
+  let i = 0;
   setInterval(async () => {
+    i++;
+    console.log('go', i)
     await testFn(vCcCv);
+    console.log('done');
   }, 100);
 }
 

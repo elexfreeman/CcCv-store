@@ -146,7 +146,7 @@ int store_set(char *key, char *val) {
     return 0;
   }
 
-  store_remove(key);
+  //store_remove(key);
 
   const char *istmt = "INSERT INTO data_tbl1 (idx, data) Values(?,?);";
 
@@ -158,7 +158,7 @@ int store_set(char *key, char *val) {
   }
 
   sqlite3_bind_text(p_stmt, 1, key, strlen(key), SQLITE_TRANSIENT);
-  sqlite3_bind_blob(p_stmt, 2, val, strlen(val), SQLITE_STATIC);
+  sqlite3_bind_blob(p_stmt, 2, val, strlen(val), SQLITE_TRANSIENT);
   //  sqlite3_bind_text(p_stmt, 2, val, strlen(val), SQLITE_TRANSIENT);
   ret = sqlite3_step(p_stmt);
   sqlite3_finalize(p_stmt);

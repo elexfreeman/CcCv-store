@@ -26,8 +26,8 @@ int parse_client_msg_cmd(const struct uv_buf_t *buf) {
   }
   if (buf->base[0] == '3') {
     cmd = CMD_DELETE;
-}
-return cmd;
+  }
+  return cmd;
 }
 
 static int check_msg_valid(const struct uv_buf_t *buf) {
@@ -72,13 +72,14 @@ char *parse_client_msg_data(const struct uv_buf_t *buf) {
     return NULL;
   }
 
-  return str_slice(buf->base, get_end_of_key(buf) + 1, (int)buf->len);
+  char* data = str_slice(buf->base, get_end_of_key(buf) + 1, (int)buf->len);
+  return data;
 }
 
 struct stru_task *parse_client_msg(const struct uv_buf_t *buf) {
   struct stru_task *resp = malloc(sizeof(struct stru_task *));
   resp->cmd = parse_client_msg_cmd(buf);
-  resp->key = parse_client_msg_key(buf);
+  resp->key = parse_client_msg_key(buf); 
   resp->data = parse_client_msg_data(buf);
 
   return resp;
