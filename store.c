@@ -26,9 +26,6 @@ int store_init(struct stru_config *config) {
   } else {
     int rc = sqlite3_open(config->db_file, &db);
   }
-  // int rc = sqlite3_open("file::memory:?cache=shared", &db);
-  // int rc = sqlite3_open("file::memory:", &db);
-  // int rc = sqlite3_open(config->data_file_name, &db);
 
   if (rc != SQLITE_OK) {
     fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
@@ -134,7 +131,7 @@ int store_close() {
   return 1;
 }
 
-int store_set(char *key, char *val) {
+static int store_insert(char *key, char *val) {
   int rc = 0;
   int ret = 0;
 
@@ -145,10 +142,7 @@ int store_set(char *key, char *val) {
     fprintf(stderr, "ERROR: store is not init\n");
     return 0;
   }
-
-  //store_remove(key);
-
-  const char *istmt = "INSERT INTO data_tbl1 (idx, data) Values(?,?);";
+  const char *istmt = "INSERT INTO data_tbl1 (idx, data) vALUES(?,?);";
 
   ret = sqlite3_prepare_v2(db, istmt, strlen(istmt), &p_stmt, &p_oz);
 
@@ -159,7 +153,7 @@ int store_set(char *key, char *val) {
 
   sqlite3_bind_text(p_stmt, 1, key, strlen(key), SQLITE_TRANSIENT);
   sqlite3_bind_blob(p_stmt, 2, val, strlen(val), SQLITE_TRANSIENT);
-  //  sqlite3_bind_text(p_stmt, 2, val, strlen(val), SQLITE_TRANSIENT);
+
   ret = sqlite3_step(p_stmt);
   sqlite3_finalize(p_stmt);
 
@@ -169,5 +163,62 @@ int store_set(char *key, char *val) {
   }
 
   return 1;
+}
+
+static int store_update(char *key, char *val) {
+  int rc = 0;
+  int ret = 0;
+
+  sqlite3_stmt *p_stmt;
+  const char *p_oz;
+
+  if (!is_ok) {
+    fprintf(stderr, "ERROR: store is not init\n");
+    return 0;
+  }
+  const char *istmt = "UPDATE data_tbl1 "
+                      "SET data=? "
+                      "WHERE idx=?;";
+
+  void *data = store_get(key);
+
+  ret = sqlite3_prepare_v2(db, istmt, strlen(istmt), &p_stmt, &p_oz);
+
+  if (ret != SQLITE_OK) {
+    fprintf(stderr, "ERROR SQL set: %s\n", sqlite3_errmsg(db));
+    return 0;
+  }
+
+  sqlite3_bind_text(p_stmt, 1, key, strlen(key), SQLITE_TRANSIENT);
+  sqlite3_bind_blob(p_stmt, 2, val, strlen(val), SQLITE_TRANSIENT);
+
+  ret = sqlite3_step(p_stmt);
+  sqlite3_finalize(p_stmt);
+
+  if (ret != SQLITE_DONE) {
+    fprintf(stderr, "ERROR SQL set: %s\n", sqlite3_errmsg(db));
+    return 0;
+  }
+
+  return 1;
+}
+
+int store_set(char *key, char *val) {
+  int ret = 0;
+
+  if (!is_ok) {
+    fprintf(stderr, "ERROR: store is not init\n");
+    return 0;
+  }
+
+  void *data = store_get(key);
+  if (data == NULL) {
+    ret = store_insert(key, val);
+  } else {
+    ret = store_update(key, val);
+    free(data);
+  }
+
+  return ret;
 }
 #endif
