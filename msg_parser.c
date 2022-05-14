@@ -72,14 +72,14 @@ char *parse_client_msg_data(const struct uv_buf_t *buf) {
     return NULL;
   }
 
-  char* data = str_slice(buf->base, get_end_of_key(buf) + 1, (int)buf->len);
+  char *data = str_slice(buf->base, get_end_of_key(buf) + 1, (int)buf->len - 1);
   return data;
 }
 
 struct stru_task *parse_client_msg(const struct uv_buf_t *buf) {
   struct stru_task *resp = malloc(sizeof(struct stru_task *));
   resp->cmd = parse_client_msg_cmd(buf);
-  resp->key = parse_client_msg_key(buf); 
+  resp->key = parse_client_msg_key(buf);
   resp->data = parse_client_msg_data(buf);
 
   return resp;

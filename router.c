@@ -56,11 +56,11 @@ static char *route_get(struct stru_task *task) {
   char *msg = NULL;
 
   if (p_data) {
-    int msg_len = strlen(task->key) + 4 + strlen(p_data);
+    int msg_len = strlen(task->key) + strlen(p_data) - 2;
     msg = (char *)malloc(msg_len);
     snprintf(msg, msg_len, "2|%s|%s", task->key, (char *)p_data);
   } else {
-    int msg_len = strlen(task->key) + 4;
+    int msg_len = strlen(task->key) - 1;
     msg = (char *)malloc(msg_len);
     snprintf(msg, msg_len, "2|%s|", task->key);
   }
